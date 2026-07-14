@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(git status*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git branch*)",
+      "Bash(npm run lint*)",
+      "Bash(npm run type*)",
+      "Bash(npm test*)",
+      "Bash(npx tsc*)",
+      "Bash(python -m pytest*)",
+      "Bash(pip list*)",
+      "Bash(node --version*)",
+      "Bash(npm --version*)",
+      "Bash(python --version*)",
+      "Read",
+      "Edit",
+      "Write",
+      "Agent"
+    ],
+    "deny": []
+  }
+}

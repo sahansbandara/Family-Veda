@@ -1,0 +1,36 @@
+{
+  "name": "universal-agent-skill-pack-template-v5-final",
+  "version": "5.0.0",
+  "mode": "TEMPLATE_MODE",
+  "purpose": "Reusable project-start AI agent skill pack",
+  "canonical_agent_folder": "agent/",
+  "canonical_skills_folder": "skills/",
+  "claude_compatibility_skills_folder": "claude/skills/",
+  "destructive_changes_require_approval": true,
+  "leaked_prompts_policy": "Do not copy leaked prompts verbatim; use safe structural patterns only.",
+  "gates": {
+    "pre_project": "skills/grill-project/SKILL.md",
+    "development": "skills/development-methodology/SKILL.md"
+  },
+  "recommended_first_instruction": "Read PROJECT_SETUP_AGENT_PROMPT.md. Run the pre-project grill, select the project tools, decide whether an LLM is required, evaluate suitable free LLM APIs when relevant, define evaluation and approval rules, then customize the template. Do not write application code until CLAUDE.md is switched from TEMPLATE_MODE to PROJECT_MODE.",
+  "included_systems": [
+    "grill-project",
+    "development-methodology",
+    "tool-router",
+    "output-evaluator",
+    "approval-gate",
+    "sandbox-execution",
+    "automation-readiness",
+    "record-to-skill",
+    "llm-provider-selector",
+    "web-data-acquisition",
+    "coolify-rules",
+    "supabase-rules"
+  ],
+  "selected_external_projects": {
+    "Crawl4AI": "web-data-acquisition",
+    "Browser Use": "web-data-acquisition",
+    "Coolify": "deployment candidate",
+    "Supabase": "backend candidate"
+  }
+}
