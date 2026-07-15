@@ -12,6 +12,45 @@ Read:
 - `agent/MEMORY.md`
 - `agent/DECISIONS.md`
 
+## Available agents
+
+| Agent | Purpose | Model | When to use |
+|---|---|---|---|
+| `worker` | File reads, grep, single edits | Haiku/Sonnet | Fully specified, no judgment needed |
+| `researcher` | Code search, doc lookup, web research | Sonnet | "Where is X", "what does Y do" |
+| `implementer` | Feature implementation, bug fixes | Sonnet | Clear spec or plan exists |
+| `code-reviewer` | Code quality, patterns, best practices | Sonnet | After writing/modifying code |
+| `security-reviewer` | OWASP Top 10, secrets, vulnerabilities | Sonnet | Auth, user input, API endpoints, sensitive data |
+| `tdd-guide` | Test-driven development | Sonnet | New features, bug fixes — write tests first |
+| `build-error-resolver` | Fix build/type errors | Sonnet | Build fails — minimal diffs only |
+| `architect` | System design, scalability, ADRs | Opus | Architectural decisions, tradeoffs |
+| `doc-updater` | Documentation, codemaps | Haiku | Updating docs, generating codemaps |
+| `planner` | Implementation planning, decisions | Opus | Ambiguous requirements, complex features |
+| `performance-optimizer` | Bottleneck analysis, profiling | Sonnet | Performance issues, optimization |
+
+### Immediate agent usage (no user prompt needed)
+
+1. Complex feature requests → **planner**
+2. Code just written/modified → **code-reviewer**
+3. Bug fix or new feature → **tdd-guide**
+4. Architectural decision → **architect**
+5. Build fails → **build-error-resolver**
+6. Security-sensitive code → **security-reviewer**
+
+### Parallel execution
+
+ALWAYS use parallel agent execution for independent operations:
+
+```
+# GOOD: Parallel
+Agent(security-reviewer): "Security analysis of auth module"
+Agent(code-reviewer): "Quality review of cache system"
+Agent(tdd-guide): "Write tests for new utilities"
+
+# BAD: Sequential when unnecessary
+First security, then quality, then tests
+```
+
 ## Before project setup
 
 1. Run the grill gate when requirements are unclear.
@@ -51,6 +90,25 @@ Before using a tool:
 - Bound revision loops.
 - Use independent review for high-risk work.
 - Do not claim verification without evidence.
+
+## Code quality gates
+
+### Before any commit
+
+- [ ] `code-reviewer` agent run — no CRITICAL or HIGH issues
+- [ ] `security-reviewer` agent run for auth/input/API changes
+- [ ] Tests passing with 80%+ coverage
+- [ ] No hardcoded secrets
+- [ ] No console.log/debug statements
+
+### Review severity levels
+
+| Level | Meaning | Action |
+|---|---|---|
+| CRITICAL | Security vulnerability or data loss | **BLOCK** — must fix |
+| HIGH | Bug or significant quality issue | **WARN** — should fix |
+| MEDIUM | Maintainability concern | **INFO** — consider |
+| LOW | Style or minor suggestion | **NOTE** — optional |
 
 ## Change control
 
