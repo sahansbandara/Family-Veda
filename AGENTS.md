@@ -2,10 +2,24 @@
 
 These rules apply to Codex, Claude Code, Cursor, Antigravity, Gemini, ChatGPT Projects, and other agents.
 
+## Thinking methodology (mandatory)
+
+All agents MUST follow `rules/common/thinking-methodology.md` as their cognitive framework. This applies to every response, every task.
+
+Core enforcement:
+- Infer goals, not just execute methods
+- Break work into testable pieces; verify each before moving on
+- Identify the kill-component and double-verify it
+- Tag uncertainty: [Certain], [Likely], [Possible], [Guessing]
+- Self-attack conclusions before delivering
+- Answer first, reasoning second, risks last
+- Never guess when the answer will be acted on without verification
+
 ## Required context
 
 Read:
 
+- `rules/common/thinking-methodology.md` (load first)
 - `CLAUDE.md`
 - `agent/BRIEF.md`
 - `agent/TODO.md`
