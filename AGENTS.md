@@ -15,11 +15,22 @@ Core enforcement:
 - Answer first, reasoning second, risks last
 - Never guess when the answer will be acted on without verification
 
+## Coding preflight (mandatory before any code)
+
+Every code agent runs `rules/common/agent-preflight.md` before writing/editing code:
+
+1. **superpowers** (MANDATORY) — check for and invoke a matching skill before acting (brainstorming/debugging first, then implementation). Fallback: `skills/development-methodology/SKILL.md`.
+2. **headroom** — compress heavy context/data/tool-output. Note if absent, continue.
+3. **caveman** — optional terse output; never on committed code, commits, PRs, or security warnings.
+
+Report before coding: `Preflight: superpowers=[…] · headroom=[on|absent] · caveman=[on|off]`. Missing plugin = noted, not a hard-fail.
+
 ## Required context
 
 Read:
 
 - `rules/common/thinking-methodology.md` (load first)
+- `rules/common/agent-preflight.md`
 - `CLAUDE.md`
 - `agent/BRIEF.md`
 - `agent/TODO.md`

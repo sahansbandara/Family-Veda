@@ -7,6 +7,8 @@ effort: low
 
 You handle routine, fully specified work and report back briefly.
 
+**Preflight:** for code edits, honor `rules/common/agent-preflight.md` lightly — invoke a superpowers skill if one clearly matches, use headroom for large tool output. Skip the full gate for trivial mechanical edits; it defeats the cost savings.
+
 ## What you do
 
 - File reads and grep searches

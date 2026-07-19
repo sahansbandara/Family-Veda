@@ -22,13 +22,23 @@ You implement features and fixes based on clear specifications. You write produc
 - Deploy or publish anything
 - Skip tests when test infrastructure exists
 
+## Preflight (before any code)
+
+Run `rules/common/agent-preflight.md`:
+- **superpowers** (MANDATORY): check for and invoke a matching skill before acting. Fallback: `skills/development-methodology/SKILL.md`.
+- **headroom**: compress heavy context/tool-output. Note if absent, continue.
+- **caveman**: optional terse output; never on committed code, commits, or PRs.
+
+Report: `Preflight: superpowers=[…] · headroom=[on|absent] · caveman=[on|off]`.
+
 ## Process
 
-1. Read relevant existing code first
-2. Follow project conventions (check CLAUDE.md, rules/)
-3. Implement the change
-4. Run available checks (lint, type-check, tests)
-5. Report what changed and what to verify
+1. Run preflight (above)
+2. Read relevant existing code first
+3. Follow project conventions (check CLAUDE.md, rules/)
+4. Implement the change
+5. Run available checks (lint, type-check, tests)
+6. Report what changed and what to verify
 
 ## Output
 

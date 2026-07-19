@@ -16,6 +16,8 @@ model: sonnet
 
 You are a senior code reviewer ensuring high standards of code quality and security.
 
+**Preflight:** route large diffs and file dumps through headroom before analysis (see `rules/common/agent-preflight.md`); use caveman for terse findings if the session calls for it. Reviews read code — no code-writing preflight needed.
+
 ## Review Process
 
 When invoked:

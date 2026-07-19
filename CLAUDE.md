@@ -30,12 +30,23 @@ Key principles enforced:
 Read:
 
 1. `rules/common/thinking-methodology.md` (cognitive framework — load first)
-2. `agent/BRIEF.md`
-3. `agent/TODO.md`
-4. `agent/MEMORY.md`
-5. `agent/DECISIONS.md`
-6. `design.md`
-7. Relevant skills, rules, workflows, and docs
+2. `rules/common/agent-preflight.md` (preflight gate — superpowers, headroom, caveman)
+3. `agent/BRIEF.md`
+4. `agent/TODO.md`
+5. `agent/MEMORY.md`
+6. `agent/DECISIONS.md`
+7. `design.md`
+8. Relevant skills, rules, workflows, and docs
+
+## Coding preflight (before ANY code)
+
+Before writing, editing, or generating code, every agent runs `rules/common/agent-preflight.md`:
+
+1. **superpowers** (MANDATORY) — check for a matching skill and invoke it before acting. Process skills first (brainstorming, systematic-debugging), then implementation skills. Fallback: `skills/development-methodology/SKILL.md`.
+2. **headroom** — compress heavy context/data/tool-output (15–20% savings for coding, 60–95% for JSON). Note if absent, continue.
+3. **caveman** — optional terse output mode (~75% fewer output tokens). Never applied to committed code, commits, PRs, or security warnings.
+
+Report one line before coding: `Preflight: superpowers=[…] · headroom=[on|absent] · caveman=[on|off]`. Each check degrades gracefully — a missing plugin is noted, never a hard-fail.
 
 Report:
 
@@ -68,6 +79,10 @@ Report:
 > Extends git workflow with full feature development process.
 
 ### Feature implementation pipeline
+
+-1. **Preflight** (mandatory before touching code)
+   - Run `rules/common/agent-preflight.md`: superpowers skill check, headroom context compression, optional caveman output mode.
+   - Report the preflight line.
 
 0. **Research & reuse** (mandatory before any new implementation)
    - GitHub code search first: `gh search repos` and `gh search code` for existing implementations.
@@ -135,7 +150,7 @@ Always-follow guidelines organized by scope:
 
 | Directory | Scope |
 |---|---|
-| `rules/common/` | Universal: thinking-methodology, security, testing, code-review, coding-style, git-workflow, development-workflow, performance, patterns, agents, hooks |
+| `rules/common/` | Universal: thinking-methodology, agent-preflight, security, testing, code-review, coding-style, git-workflow, development-workflow, performance, patterns, agents, hooks |
 | `rules/typescript/` | TypeScript/JavaScript projects |
 | `rules/python/` | Python projects |
 | `rules/golang/` | Go projects |

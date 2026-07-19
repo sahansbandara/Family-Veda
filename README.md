@@ -84,6 +84,18 @@ Once in `PROJECT_MODE`, every feature follows this pipeline:
 6. **Security** — use `security-reviewer` agent for auth/input/API changes
 7. **Commit** — conventional commits, reviewed diff
 
+## Coding preflight
+
+Before any agent writes code, it runs `rules/common/agent-preflight.md` — three efficiency/discipline systems, each degrading gracefully if not installed:
+
+| System | Purpose |
+|---|---|
+| **superpowers** (mandatory) | Skill discipline — checks for and invokes a matching skill (brainstorming, TDD, debugging) before acting |
+| **headroom** | Context compression — 15–20% fewer tokens for coding, 60–95% for JSON/data |
+| **caveman** | Optional terse output mode (~75% fewer output tokens) — never on committed code, commits, PRs, or security warnings |
+
+A missing plugin is noted, never a hard-fail. Agents report `Preflight: superpowers=[…] · headroom=[on|absent] · caveman=[on|off]` before coding.
+
 ## Project gates
 
 Before coding starts, the template enforces:
