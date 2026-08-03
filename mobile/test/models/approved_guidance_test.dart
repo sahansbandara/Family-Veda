@@ -1,0 +1,24 @@
+import 'package:family_veda/models/approved_guidance.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  test('patient parser rejects final advisory in unapproved state', () {
+    final result = ApprovedGuidance.fromPatientJson({
+      'caseId': 'case-1',
+      'status': 'PENDING_DOCTOR_REVIEW',
+      'finalAdvisory': 'This must stay hidden.',
+    });
+    expect(result, isNull);
+  });
+
+  test('patient parser accepts final advisory in approved state', () {
+    final result = ApprovedGuidance.fromPatientJson({
+      'caseId': 'case-2',
+      'status': 'APPROVED',
+      'finalAdvisory': 'Doctor-approved follow-up guidance.',
+      'doctorName': 'Dr Test',
+      'approvedAtLabel': '4 Aug 2026',
+    });
+    expect(result?.caseId, 'case-2');
+  });
+}

@@ -194,7 +194,7 @@ STAGE 2 — FAMILIAL ANALYSIS (family-wide)            [S4]
 
 | Pattern | One carrier/affected parent | Both carriers | System output |
 |---|---|---|---|
-| Autosomal recessive (β-thalassaemia, cystic fibrosis) | 0% affected · 50% carrier | 25% affected · 50% carrier | Screening indicated; second-parent status required |
+| Autosomal recessive (β-thalassaemia, cystic fibrosis) | If other parent is confirmed not a carrier: 0% affected · 50% carrier. If status is unknown: no numeric affected-risk claim | If both parents are confirmed carriers: 25% affected · 50% carrier | Screening indicated; second-parent status required |
 | Autosomal dominant (Huntington's, familial hypercholesterolaemia) | 50% affected | — | Screening indicated |
 | X-linked recessive (haemophilia, G6PD deficiency) | Depends on the child's sex and which parent | — | Screening indicated; sex-specific note |
 | Polygenic / multifactorial (type 2 diabetes, hypertension, alopecia) | Increased relative risk only | — | Risk factor noted; **no predictive claim** |
@@ -207,7 +207,7 @@ STAGE 2 — FAMILIAL ANALYSIS (family-wide)            [S4]
 |---|---|
 | LLM unavailable or times out | `AGENT_FAILED`; member sees "Please consult your doctor directly"; **no partial output** |
 | Output fails schema validation | Retry once; second failure → safe failure path |
-| Red-flag symptom detected | Bypass queue → `ESCALATED` → immediate doctor broadcast + emergency guidance |
+| Red-flag symptom detected | Bypass LLM → `ESCALATED` → deterministic referral; active-grant doctor notification only |
 | Confidence below threshold | Case still goes to a doctor, marked `LOW_CONFIDENCE`, draft advisory hidden |
 | Denied tool call attempted | Hard error, logged as a violation, workflow halts |
 | No doctor available within SLA | Escalate to the shared pool; if still unassigned → advise in-person care |

@@ -1,0 +1,24 @@
+using FamilyVeda.Application.Triage;
+using FamilyVeda.Domain.Common;
+using FamilyVeda.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+
+namespace FamilyVeda.Infrastructure.Triage;
+
+public sealed class CaseSlaProcessor(AppDbContext dbContext, INotificationService notifications, IConfiguration configuration) : ICaseSlaProcessor
+{
+    public async Task<int> ProcessOverdueCasesAsync(CancellationToken cancellationToken)
+    {
+        var cutoff = DateTimeOffset.UtcNow.AddHours(-configuration.GetValue("Sla:DoctorResponseHours", 6));
+        var overdue = await dbContext.TriageCases.Where(x =>
+                (x.Status == TriageStatus.PendingDoctorReview || x.Status == TriageStatus.LowConfidence || x.Status == TriageStatus.Claimed) &&
+                x.CreatedAt <= cutoff && x.FailureCode != "DOCTOR_RESPONSE_DELAY")
+            .ToListAsync(cancellationToken);
+        foreach (var triageCase in overdue) triageCase.FailureCode = "DOCTOR_RESPONSE_DELAY";
+        if (overdue.Count == 0) return 0;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        foreach (var triageCase in overdue) await notifications.SendCaseStatusAsync(triageCase.Id, triageCase.Status, cancellationToken);
+        return overdue.Count;
+    }
+}

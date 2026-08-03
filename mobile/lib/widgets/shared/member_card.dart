@@ -1,0 +1,31 @@
+// [S1] Identity, Family & Consent.
+import 'package:family_veda/models/member.dart';
+import 'package:flutter/material.dart';
+
+class MemberCard extends StatelessWidget {
+  const MemberCard({
+    super.key,
+    required this.member,
+    required this.isActive,
+    required this.onSelected,
+  });
+
+  final Member member;
+  final bool isActive;
+  final VoidCallback onSelected;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    child: ListTile(
+      minVerticalPadding: 12,
+      leading: CircleAvatar(child: Text(member.displayName.characters.first)),
+      title: Text(member.displayName),
+      subtitle: Text(member.relationshipLabel),
+      trailing: isActive
+          ? const Icon(Icons.check_circle, semanticLabel: 'Active member')
+          : const Icon(Icons.chevron_right),
+      selected: isActive,
+      onTap: onSelected,
+    ),
+  );
+}

@@ -1,0 +1,30 @@
+// [S3] Triage & Agent Orchestration.
+import 'package:flutter/material.dart';
+
+class SymptomChip extends StatelessWidget {
+  const SymptomChip({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final String label;
+  final bool selected;
+  final ValueChanged<bool> onSelected;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    selected: selected,
+    label: label,
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
+      child: FilterChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: onSelected,
+      ),
+    ),
+  );
+}

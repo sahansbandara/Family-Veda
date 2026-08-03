@@ -1,0 +1,68 @@
+// [S1] Identity, Family & Consent.
+import 'package:dio/dio.dart';
+import 'package:family_veda/services/api/api_client.dart';
+
+class AuthTokens {
+  const AuthTokens({required this.accessToken, required this.refreshToken});
+
+  final String accessToken;
+  final String refreshToken;
+}
+
+abstract interface class AuthApi {
+  Future<AuthTokens> login({required String email, required String password});
+  Future<AuthTokens> refresh(String refreshToken);
+  Future<void> logout();
+}
+
+class DioAuthApi implements AuthApi {
+  const DioAuthApi(this._client);
+
+  final ApiClient _client;
+
+  @override
+  Future<AuthTokens> login({
+    required String email,
+    required String password,
+  }) async {
+    final response = await _client.dio.post<Map<String, dynamic>>(
+      '/auth/login',
+      data: {'email': email, 'password': password},
+    );
+    final data = response.data;
+    if (data == null) throw const FormatException('Empty login response');
+    return AuthTokens(
+      accessToken: data['accessToken'] as String,
+      refreshToken: data['refreshToken'] as String,
+    );
+  }
+
+  @override
+  Future<AuthTokens> refresh(String refreshToken) async {
+    final response = await _client.dio.post<Map<String, dynamic>>(
+      '/auth/refresh',
+      data: {'refreshToken': refreshToken},
+    );
+    final data = response.data;
+    if (data == null) throw const FormatException('Empty refresh response');
+    return AuthTokens(
+      accessToken: data['accessToken'] as String,
+      refreshToken: data['refreshToken'] as String,
+    );
+  }
+
+  @override
+  Future<void> logout() => _client.dio.post<void>('/auth/logout');
+}
+
+String userFacingApiError(Object error) {
+  if (error is DioException) {
+    final status = error.response?.statusCode;
+    if (status == 401) return 'Email or password is incorrect.';
+    if (status == 403) return 'Your account cannot access this feature.';
+    if (status != null && status >= 500) {
+      return 'Service is temporarily unavailable. Please try again.';
+    }
+  }
+  return 'Could not connect. Check your connection and try again.';
+}

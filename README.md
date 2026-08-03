@@ -38,7 +38,7 @@ Family Veda closes that gap. A family maintains one shared account with individu
               ▼                           ▼
    ┌────────────────────┐    ┌──────────────────────────────┐
    │    POSTGRESQL 16   │    │   CONTROLLED AGENTIC AI      │
-   │  18 tables         │    │   Coordinator / Planner      │
+   │  20 tables         │    │   Coordinator / Planner      │
    │  EF Core migrations│    │    ├─ Extraction Agent       │
    └────────────────────┘    │    ├─ Context Agent          │
                              │    ├─ Analysis Agent         │
@@ -200,7 +200,7 @@ Test plan and the 8 priority cases: [`docs/TESTING.md`](docs/TESTING.md).
 |---|---|
 | [`docs/Family_Veda_Project_Blueprint.md`](docs/Family_Veda_Project_Blueprint.md) | Full blueprint — the source of truth |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System architecture and integration rules |
-| [`docs/DATABASE.md`](docs/DATABASE.md) | Schema, 18 tables, state machines, seed policy |
+| [`docs/DATABASE.md`](docs/DATABASE.md) | Schema, 20 tables, state machines, seed policy |
 | [`docs/API_CONTRACT.md`](docs/API_CONTRACT.md) | Endpoints, conventions, status codes |
 | [`docs/AGENTS_DESIGN.md`](docs/AGENTS_DESIGN.md) | Agents, tool permission matrix, traces |
 | [`docs/CLINICAL_SAFETY.md`](docs/CLINICAL_SAFETY.md) | Advice boundaries, emergency path, genetics framing |

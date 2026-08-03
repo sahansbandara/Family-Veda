@@ -29,7 +29,7 @@ SELECT * FROM case_access_grants
 -- no row → 403
 ```
 
-Grants are created by three paths, recorded in `granted_reason`: `PRIMARY_DOCTOR` (on assignment, 48 h), `POOL_CLAIM` (a verified doctor claims from the shared pool after the 6 h SLA lapses), `ESCALATION` (emergency broadcast).
+Grants are created by assignment or atomic pool claim. Emergency cases may enter a de-identified pool, but no clinical identifiers or push metadata are disclosed until a claim creates an active grant.
 
 The role check does not disappear — it is layer 2 of four (see `docs/ARCHITECTURE.md`). Being `VERIFIED` is *necessary*; it is not *sufficient*.
 

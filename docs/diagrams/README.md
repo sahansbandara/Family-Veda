@@ -6,7 +6,7 @@ Export every diagram as **PNG or SVG** for the report, and keep the editable sou
 
 | File | Contents | Owner | Due |
 |---|---|---|---|
-| `er-diagram.*` | All 18 tables, FKs, key constraints and indexes | S2 | W1 |
+| `er-diagram.*` | All 20 tables, FKs, key constraints and indexes | S2 | W1 |
 | `architecture.*` | The reference architecture — Flutter + React → API → PostgreSQL + agents → notification service | S3 | W1 |
 | `agent-workflow.*` | Coordinator → Context → Analysis → Familial Risk → Safety → approval gate → patient | S3 | W1 |
 | `triage-state-machine.*` | `SUBMITTED` … `CLOSED`, including `AGENT_FAILED` and `ESCALATED` | S3 | W1 |

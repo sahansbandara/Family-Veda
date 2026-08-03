@@ -23,10 +23,17 @@ Local values go in `.env` (gitignored). Hosted values go in the platform's envir
 | `Agents__ConfidenceThreshold` | Below this → `LOW_CONFIDENCE`, draft hidden | Yes | all |
 | `Ocr__Engine` | `Tesseract` or `MlKit` | Yes | all |
 | `Ocr__TesseractDataPath` | Tesseract language data path | If Tesseract | all |
+| `Ocr__TimeoutSeconds` | Hard timeout for each native OCR process | Yes | all |
+| `Ocr__MaxConcurrentProcesses` | Bounded native OCR concurrency (`1`-`4`) | Yes | all |
+| `Ocr__MaxOutputCharacters` | Maximum accepted OCR text size | Yes | all |
 | `Storage__LabReportPath` | Where uploaded lab report files are stored | Yes | all |
 | `Storage__MaxUploadBytes` | Upload size limit | Yes | all |
-| `Fcm__ServerKey` | **Firebase Cloud Messaging server key — secret** | Yes | all |
+| `Fcm__ServiceAccountJson` | **Firebase service-account JSON — secret; FCM HTTP v1 only** | Yes | all |
 | `Fcm__ProjectId` | Firebase project id | Yes | all |
+| `Database__MigrateOnStartup` | Apply EF migrations at API startup | Hosted only | production |
+| `Seed__Enabled` | Enable idempotent synthetic demonstration seed | Hosted/demo only | production/demo |
+| `Seed__DefaultPassword` | **Shared initial demo password — secret** | If seed enabled | production/demo |
+| `DataProtection__KeysPath` | Persistent key-ring directory for encrypted device tokens | Yes | hosted |
 | `Twilio__AccountSid` | **Twilio SID — secret** (SMS fallback) | Optional | all |
 | `Twilio__AuthToken` | **Twilio auth token — secret** | Optional | all |
 | `Twilio__FromNumber` | Sender number | Optional | all |
@@ -54,6 +61,17 @@ flutter run --dart-define=API_BASE_URL=https://api.familyveda.app/api/v1 --dart-
 ```
 
 Firebase configuration comes from `google-services.json`, which is **not committed**.
+
+### Android release signing
+
+Release APK/AAB builds fail closed unless all four values are supplied to Gradle. Keep the keystore and values outside Git.
+
+| Name | Purpose | Required |
+|---|---|---|
+| `ANDROID_KEYSTORE_PATH` | Absolute path to the Android signing keystore | release only |
+| `ANDROID_KEYSTORE_PASSWORD` | Keystore password | release only |
+| `ANDROID_KEY_ALIAS` | Signing key alias | release only |
+| `ANDROID_KEY_PASSWORD` | Signing key password | release only |
 
 ## Rules
 

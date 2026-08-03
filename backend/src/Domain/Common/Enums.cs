@@ -1,0 +1,32 @@
+namespace FamilyVeda.Domain.Common;
+
+public enum UserType { FamilyUser, Doctor, Admin }
+public enum FamilyRole { Head, AdultMember, MinorMember }
+public enum ConsentCategory { HereditaryFlags, VitalsSummary, Conditions }
+public enum ConsentStatus { NotSet, Granted, Revoked, PendingReaffirmation }
+public enum RecordType { Condition, Allergy, Medication, Surgery, Note }
+public enum OcrStatus { Pending, Processing, Completed, Failed, ManualEntry }
+public enum TriagePriority { Routine, Priority, Emergency }
+public enum TriageStatus
+{
+    Submitted,
+    Planning,
+    ContextReady,
+    Analysed,
+    RiskAssessed,
+    Validated,
+    LowConfidence,
+    PendingDoctorReview,
+    Claimed,
+    Approved,
+    ApprovedRevised,
+    Rejected,
+    Escalated,
+    FailedSafe
+}
+
+public enum VerificationStatus { Pending, Verified, MoreInformationRequired, Rejected, Suspended }
+public enum ApprovalAction { Approve, ReviseAndApprove, RequestInformation, Reject, Escalate }
+public enum AgentKind { Extraction, Coordinator, Context, Analysis, FamilialRisk, SafetyValidation }
+public enum AgentStepStatus { Started, Completed, Failed, ToolDenied, SafeFailure }
+public enum CarrierStatus { Carrier, NotCarrier, Unknown }

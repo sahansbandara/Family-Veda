@@ -49,13 +49,13 @@ The AI does context; the doctor does medicine. Family Veda closes the **context 
 
 ### Genetics framing — the highest-risk viva topic
 - Never claim inheritance. Claim a **screening indication**.
-- Autosomal recessive with one carrier parent = 0% affected, 50% carrier. Both parents carriers = 25% affected, 50% carrier.
+- Autosomal recessive with one confirmed carrier parent and the other confirmed not a carrier = 0% affected, 50% carrier. When the other parent's status is unknown, report `unknownParties` and make no numeric affected-risk claim. Both confirmed carriers = 25% affected, 50% carrier.
 - Always report `unknownParties` when a parent's status is unknown.
 - `relationships.is_biological` is mandatory — adoptive and step relationships are excluded from all hereditary reasoning.
 - The inheritance table is hardcoded, cited and deterministic. **Never LLM-generated.**
 
 ### Emergency behaviour
-Deterministic red-flag check runs *before* any LLM output could surface. On a hit: emergency screen, Suwa Seriya 1990, nearest hospitals, broadcast to verified doctors, Family Head notified — and **zero AI-generated guidance**. Silence plus a referral is the safe failure mode.
+Deterministic red-flag check runs *before* any LLM output could surface. On a hit: emergency referral, patient or minor guardian notification, active-grant doctor notification, and **zero AI-generated guidance**. Unassigned doctors use a de-identified claim pool; identifiers are never broadcast.
 
 ### Repository structure decision
 One application, four authors. A **folder-per-student layout was considered and rejected** — it produces four `Program.cs`, four DbContexts, no shared identity, and makes the cross-platform workflow physically impossible, which lands directly in the rubric's 2-mark "disconnected prototype" band. Proof of individual work is `git log --author`, not folder names.
@@ -126,5 +126,9 @@ Announce "taking migration lock, ~20 min" in the group chat → `git pull origin
 - Physical Android device required for the W7 device-feature check and the W8 APK test.
 
 ## Session handoff notes
+- **2026-08-04 final hardening** — Added complete web family/doctor onboarding, doctor status gating, emergency doctor referral and broadcast, failed-safe/SLA patient referrals, >100-case recovery, manual OCR confirmation with confirmed-only agent reads, conservative deterministic rule-table interfaces, approved-only familial screening guidance, relationships/consent UI, records/vitals/lab review, mobile record/vital entry, explicit clinical endpoint policies and expanded tests. Current local gates: 42 backend unit + 4 PostgreSQL integration + 17 React + 24 Flutter tests pass; builds/analyzers clean; EF model clean; Docker runtime healthy with PostgreSQL and Tesseract. Live provider authentication, Ollama, Firebase, Android SDK/device, citations and human coursework remain external.
+- **2026-08-04 review closure** — De-identified and audited pre-grant case pool; grant-only doctor push; fail-closed emergency synonyms/severity/young-child fever including notes; consent audits on every automatic/manual transition; confirmed-only flags and immutable reviewed extraction; bounded non-root image OCR; email-bound one-time adult invitations; vulnerable NuGet graph cleared. Final local gates: 56 backend unit + 5 PostgreSQL integration + 17 React + 25 Flutter tests pass; builds/analyzers/formatting clean; EF model clean; Docker production runtime healthy as non-root with PostgreSQL migration and Tesseract.
+
+- **2026-08-04 full build** — Implemented .NET 8 API, 20-table PostgreSQL schema, JWT/refresh flow, family/consent/records/triage/doctor workflows, tool-dispatched Extraction/Context/Analysis/Familial Risk agents, deterministic emergency/safety gate, approval-only patient guidance, Tesseract upload/OCR, FCM HTTP v1 subscriptions, React clinical/admin workspace, Flutter patient app with camera upload, synthetic seed, Render/Neon/Vercel configs. Local gates: backend build clean; 19 unit + 2 PostgreSQL integration tests pass; web lint + 11 tests + build pass; Flutter analysis + 22 tests pass. Android SDK, live Ollama, Firebase config, and provider credentials remain external verification blockers. Migration lock released after pending-model check and PostgreSQL application test.
 
 - **2026-08-04** — Repository converted from the universal agent template into the Family Veda project workspace. Template-only scaffolding, off-stack language rules and unrelated skills removed. `agent/`, `docs/`, `rules/`, `skills/`, `workflows/` rewritten against the blueprint. Mode switched `TEMPLATE_MODE → PROJECT_MODE`. No application code written yet; implementation starts at the W2 skeleton.

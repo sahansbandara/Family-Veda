@@ -1,0 +1,34 @@
+import { describe, expect, it } from 'vitest'
+
+import authReducer, { signedIn, signedOut } from './authSlice'
+
+describe('authSlice', () => {
+  it('stores a verified doctor session', () => {
+    const state = authReducer(
+      undefined,
+      signedIn({
+        id: 'doctor-synthetic-01',
+        name: 'Dr. N. Perera',
+        role: 'DOCTOR',
+        verificationStatus: 'VERIFIED',
+      }),
+    )
+
+    expect(state.user?.role).toBe('DOCTOR')
+    expect(state.user?.verificationStatus).toBe('VERIFIED')
+    expect(state.isAuthenticated).toBe(true)
+  })
+
+  it('clears the session on sign out', () => {
+    const signedInState = authReducer(
+      undefined,
+      signedIn({
+        id: 'admin-synthetic-01',
+        name: 'Clinic Administrator',
+        role: 'ADMIN',
+      }),
+    )
+
+    expect(authReducer(signedInState, signedOut()).isAuthenticated).toBe(false)
+  })
+})

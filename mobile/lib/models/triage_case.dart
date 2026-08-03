@@ -1,0 +1,39 @@
+// [S3] Triage & Agent Orchestration.
+class TriageCase {
+  const TriageCase({
+    required this.id,
+    required this.status,
+    required this.submittedAt,
+    this.failureCode,
+  });
+
+  factory TriageCase.fromJson(Map<String, dynamic> json) => TriageCase(
+    id: json['id'] as String,
+    status: _statusName(json['status'] as String),
+    submittedAt: DateTime.parse((json['submittedAt'] ?? json['createdAt']) as String),
+    failureCode: json['failureCode'] as String?,
+  );
+
+  final String id;
+  final String status;
+  final DateTime submittedAt;
+  final String? failureCode;
+
+  TriageCase withStatusDetail(Map<String, dynamic> json) => TriageCase(
+    id: id,
+    status: _statusName(json['status'] as String? ?? status),
+    submittedAt: submittedAt,
+    failureCode: json['failureCode'] as String?,
+  );
+
+  bool get hasApprovedGuidance => const {
+    'APPROVED',
+    'APPROVED_REVISED',
+    'DELIVERED',
+    'CLOSED',
+  }.contains(status);
+}
+
+String _statusName(String value) => value
+    .replaceAllMapped(RegExp(r'(?<=[a-z])(?=[A-Z])'), (_) => '_')
+    .toUpperCase();

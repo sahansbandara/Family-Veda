@@ -12,7 +12,7 @@
 | 2 | What makes your agents *distinct*? | Different scope (member vs family), different tool allow-lists, different output schemas; one is fully deterministic. **Show the tool permission matrix** |
 | 3 | Your AI touches medical data. Justify it. | It does not diagnose. It assembles context. No output reaches a patient without licensed doctor approval, enforced architecturally |
 | 4 | Does the agent read the whole family's records? | No. Raw records stay member-scoped. Only consented structured hereditary flags cross profile boundaries. The familial agent's raw-record tool is **denied at the dispatch layer** |
-| 5 | Father is a thalassaemia carrier — does the son have it? | No. Autosomal recessive requires both parents to be carriers. One carrier parent gives 0% affected, 50% carrier. Our output reports `unknownParties` and recommends screening |
+| 5 | Father is a thalassaemia carrier — does the son have it? | We cannot conclude that. Autosomal recessive conditions require relevant variants from both parents. If the other parent's status is unknown, we make no numeric affected-risk claim; we report `unknownParties` and indicate screening |
 | 6 | What is deterministic validation? | Fixed rule tables, reference ranges and JSON schema checks. Same input, same output. Not LLM judgement |
 | 7 | What if the LLM fails or hallucinates? | Schema validation, one retry, then safe failure. The patient sees "consult your doctor directly", never a partial or unapproved output |
 | 8 | What does the AI do in an emergency? | Deliberately less. A deterministic red-flag check runs before any LLM output could surface. The user sees a referral and emergency contacts, not AI guidance |
@@ -45,7 +45,7 @@ Each member must be able to do all four for their **own** component, live:
 - Show the camera capture on a physical device, end to end.
 - Show the OCR failure path: `ocr_status = FAILED`, no guessed values, manual entry offered.
 - Explain the Extraction Agent's scope and why raw content never leaves Stage 1.
-- Show a `hereditary_flags` row and trace it back to its `evidence_ref`.
+- Show a `hereditary_flags` row and trace it through either `lab_report_id` or `health_record_id`.
 
 ### S3 — Triage & Orchestration
 - Walk the state machine from `SUBMITTED` to `CLOSED`, naming every transition trigger.

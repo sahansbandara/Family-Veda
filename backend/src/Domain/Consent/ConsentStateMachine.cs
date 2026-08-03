@@ -1,0 +1,32 @@
+using FamilyVeda.Domain.Common;
+
+namespace FamilyVeda.Domain.Consent;
+
+public static class ConsentStateMachine
+{
+    public static bool CanTransition(ConsentStatus from, ConsentStatus to) => (from, to) switch
+    {
+        (ConsentStatus.NotSet, ConsentStatus.Granted) => true,
+        (ConsentStatus.Granted, ConsentStatus.Revoked) => true,
+        (ConsentStatus.Granted, ConsentStatus.PendingReaffirmation) => true,
+        (ConsentStatus.Revoked, ConsentStatus.Granted) => true,
+        (ConsentStatus.PendingReaffirmation, ConsentStatus.Granted) => true,
+        (ConsentStatus.PendingReaffirmation, ConsentStatus.Revoked) => true,
+        _ => false
+    };
+
+    public static bool RequiresReaffirmation(
+        DateOnly dateOfBirth,
+        bool guardianGranted,
+        DateTimeOffset now)
+    {
+        if (!guardianGranted)
+        {
+            return false;
+        }
+
+        var localDate = DateOnly.FromDateTime(now.UtcDateTime);
+        var eighteenthBirthday = dateOfBirth.AddYears(18);
+        return localDate >= eighteenthBirthday;
+    }
+}

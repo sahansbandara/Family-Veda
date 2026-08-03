@@ -1,0 +1,2655 @@
+---
+openapi: 3.0.1
+info:
+  title: Family Veda API
+  version: v1
+paths:
+  "/api/v1/auth/register":
+    post:
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/RegisterRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/RegisterRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/RegisterRequest"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AuthResponse"
+  "/api/v1/auth/login":
+    post:
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/LoginRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/LoginRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/LoginRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AuthResponse"
+  "/api/v1/auth/refresh":
+    post:
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/RefreshRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/RefreshRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/RefreshRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AuthResponse"
+  "/api/v1/auth/logout":
+    post:
+      tags:
+      - Auth
+      responses:
+        '200':
+          description: OK
+  "/api/v1/doctors/register":
+    post:
+      tags:
+      - Clinical
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/RegisterDoctorRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/RegisterDoctorRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/RegisterDoctorRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DoctorDto"
+  "/api/v1/doctors/me":
+    get:
+      tags:
+      - Clinical
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DoctorDto"
+  "/api/v1/doctors/me/cases":
+    get:
+      tags:
+      - Clinical
+      parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TriageCaseDtoPagedResult"
+  "/api/v1/doctors/case-pool":
+    get:
+      tags:
+      - Clinical
+      parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AvailableCaseDtoPagedResult"
+  "/api/v1/admin/doctors":
+    get:
+      tags:
+      - Clinical
+      parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DoctorDtoPagedResult"
+  "/api/v1/admin/doctors/{doctorId}/verification":
+    post:
+      tags:
+      - Clinical
+      parameters:
+      - name: doctorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/VerifyDoctorRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/VerifyDoctorRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/VerifyDoctorRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DoctorDto"
+  "/api/v1/admin/doctors/{doctorId}/verify":
+    post:
+      tags:
+      - Clinical
+      parameters:
+      - name: doctorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/VerificationReasonRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/VerificationReasonRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/VerificationReasonRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DoctorDto"
+  "/api/v1/admin/doctors/{doctorId}/request-info":
+    post:
+      tags:
+      - Clinical
+      parameters:
+      - name: doctorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/VerificationReasonRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/VerificationReasonRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/VerificationReasonRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DoctorDto"
+  "/api/v1/admin/doctors/{doctorId}/reject":
+    post:
+      tags:
+      - Clinical
+      parameters:
+      - name: doctorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/VerificationReasonRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/VerificationReasonRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/VerificationReasonRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DoctorDto"
+  "/api/v1/admin/doctors/{doctorId}/suspend":
+    post:
+      tags:
+      - Clinical
+      parameters:
+      - name: doctorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/VerificationReasonRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/VerificationReasonRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/VerificationReasonRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DoctorDto"
+  "/api/v1/triage-cases/{caseId}/claim":
+    post:
+      tags:
+      - Clinical
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApprovalDto"
+  "/api/v1/triage-cases/{caseId}/decision":
+    post:
+      tags:
+      - Clinical
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApprovalDto"
+  "/api/v1/triage-cases/{caseId}/approve":
+    post:
+      tags:
+      - Clinical
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalContentRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalContentRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalContentRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApprovalDto"
+  "/api/v1/triage-cases/{caseId}/revise":
+    post:
+      tags:
+      - Clinical
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalContentRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalContentRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalContentRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApprovalDto"
+  "/api/v1/triage-cases/{caseId}/request-info":
+    post:
+      tags:
+      - Clinical
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalContentRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalContentRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalContentRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApprovalDto"
+  "/api/v1/triage-cases/{caseId}/reject":
+    post:
+      tags:
+      - Clinical
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalContentRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalContentRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalContentRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApprovalDto"
+  "/api/v1/triage-cases/{caseId}/escalate":
+    post:
+      tags:
+      - Clinical
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalContentRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalContentRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/ApprovalContentRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApprovalDto"
+  "/api/v1/audit":
+    get:
+      tags:
+      - Clinical
+      parameters:
+      - name: subjectMemberId
+        in: query
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AuditDtoPagedResult"
+  "/api/v1/families/me":
+    get:
+      tags:
+      - Families
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/FamilyDto"
+  "/api/v1/families":
+    post:
+      tags:
+      - Families
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CreateFamilyRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/CreateFamilyRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/CreateFamilyRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/FamilyDto"
+  "/api/v1/families/{familyId}":
+    put:
+      tags:
+      - Families
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UpdateFamilyRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/UpdateFamilyRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/UpdateFamilyRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/FamilyDto"
+  "/api/v1/families/{familyId}/members":
+    get:
+      tags:
+      - Families
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      - name: search
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MemberDtoPagedResult"
+    post:
+      tags:
+      - Families
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CreateMemberRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/CreateMemberRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/CreateMemberRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MemberDto"
+  "/api/v1/families/{familyId}/invitations":
+    post:
+      tags:
+      - Families
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CreateFamilyInvitationRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/CreateFamilyInvitationRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/CreateFamilyInvitationRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/FamilyInvitationDto"
+  "/api/v1/families/invitations/accept":
+    post:
+      tags:
+      - Families
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/AcceptFamilyInvitationRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/AcceptFamilyInvitationRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/AcceptFamilyInvitationRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MemberDto"
+  "/api/v1/members/me":
+    get:
+      tags:
+      - Members
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MemberDto"
+  "/api/v1/members/{memberId}":
+    get:
+      tags:
+      - Members
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MemberDto"
+    put:
+      tags:
+      - Members
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UpdateMemberRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/UpdateMemberRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/UpdateMemberRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MemberDto"
+    delete:
+      tags:
+      - Members
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+  "/api/v1/members/{memberId}/relationships":
+    get:
+      tags:
+      - Members
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/RelationshipDto"
+    post:
+      tags:
+      - Members
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CreateRelationshipRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/CreateRelationshipRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/CreateRelationshipRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/RelationshipDto"
+  "/api/v1/members/{memberId}/consents":
+    get:
+      tags:
+      - Members
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ConsentDto"
+  "/api/v1/members/{memberId}/consents/{category}":
+    put:
+      tags:
+      - Members
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: category
+        in: path
+        required: true
+        schema:
+          "$ref": "#/components/schemas/ConsentCategory"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UpdateConsentRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/UpdateConsentRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/UpdateConsentRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ConsentDto"
+  "/api/v1/members/{memberId}/consents/reaffirm":
+    post:
+      tags:
+      - Members
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ConsentDto"
+  "/api/v1/members/{memberId}/records":
+    get:
+      tags:
+      - Records
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: type
+        in: query
+        schema:
+          "$ref": "#/components/schemas/RecordType"
+      - name: sort
+        in: query
+        schema:
+          type: string
+          default: newest
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HealthRecordDtoPagedResult"
+    post:
+      tags:
+      - Records
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UpsertHealthRecordRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/UpsertHealthRecordRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/UpsertHealthRecordRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HealthRecordDto"
+  "/api/v1/records/{recordId}":
+    put:
+      tags:
+      - Records
+      parameters:
+      - name: recordId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UpsertHealthRecordRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/UpsertHealthRecordRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/UpsertHealthRecordRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HealthRecordDto"
+    delete:
+      tags:
+      - Records
+      parameters:
+      - name: recordId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+  "/api/v1/members/{memberId}/vitals":
+    get:
+      tags:
+      - Records
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/VitalDto"
+    post:
+      tags:
+      - Records
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CreateVitalRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/CreateVitalRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/CreateVitalRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/VitalDto"
+  "/api/v1/members/{memberId}/vitals/trends":
+    get:
+      tags:
+      - Records
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/VitalTrendDto"
+  "/api/v1/members/{memberId}/lab-reports":
+    get:
+      tags:
+      - Records
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/LabReportDto"
+    post:
+      tags:
+      - Records
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - File
+              type: object
+              properties:
+                File:
+                  type: string
+                  format: binary
+                CollectedAt:
+                  type: string
+                  format: date-time
+            encoding:
+              File:
+                style: form
+              CollectedAt:
+                style: form
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/LabReportDto"
+  "/api/v1/lab-reports/{reportId}":
+    get:
+      tags:
+      - Records
+      parameters:
+      - name: reportId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/LabReportDetailDto"
+  "/api/v1/lab-reports/{reportId}/review":
+    put:
+      tags:
+      - Records
+      parameters:
+      - name: reportId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ConfirmLabReportRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/ConfirmLabReportRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/ConfirmLabReportRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/LabReportDetailDto"
+  "/api/v1/lab-reports/{reportId}/extract":
+    post:
+      tags:
+      - Records
+      parameters:
+      - name: reportId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/LabExtractionResultDto"
+  "/api/v1/members/{memberId}/hereditary-flags":
+    get:
+      tags:
+      - Records
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/HereditaryFlagDto"
+  "/api/v1/members/{memberId}/episodes":
+    post:
+      tags:
+      - Triage
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CreateEpisodeRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/CreateEpisodeRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/CreateEpisodeRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/EpisodeDto"
+    get:
+      tags:
+      - Triage
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/EpisodeDtoPagedResult"
+  "/api/v1/episodes/{episodeId}/triage":
+    post:
+      tags:
+      - Triage
+      parameters:
+      - name: episodeId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TriageCaseDto"
+  "/api/v1/triage-cases/{caseId}":
+    get:
+      tags:
+      - Triage
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TriageCaseDto"
+  "/api/v1/triage-cases/{caseId}/status":
+    get:
+      tags:
+      - Triage
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TriageStatusDto"
+  "/api/v1/triage-cases/{caseId}/traces":
+    get:
+      tags:
+      - Triage
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/AgentTraceDto"
+  "/api/v1/triage-cases/{caseId}/review":
+    get:
+      tags:
+      - Triage
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CaseReviewDto"
+  "/api/v1/triage-cases/{caseId}/approved-guidance":
+    get:
+      tags:
+      - Triage
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApprovedGuidanceDto"
+  "/api/v1/members/{memberId}/familial-risk":
+    get:
+      tags:
+      - Triage
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApprovedFamilialRiskDto"
+  "/api/v1/members/{memberId}/triage-cases":
+    get:
+      tags:
+      - Triage
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TriageCaseDtoPagedResult"
+  "/api/v1/families/{familyId}/triage-cases":
+    get:
+      tags:
+      - Triage
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TriageCaseDtoPagedResult"
+  "/api/v1/families/{familyId}/dashboard":
+    get:
+      tags:
+      - Triage
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/FamilyDashboardDto"
+  "/api/v1/notifications/subscribe":
+    post:
+      tags:
+      - Triage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/NotificationSubscriptionRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/NotificationSubscriptionRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/NotificationSubscriptionRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/NotificationSubscriptionDto"
+  "/api/v1/notifications":
+    get:
+      tags:
+      - Triage
+      parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/NotificationDtoPagedResult"
+components:
+  schemas:
+    AcceptFamilyInvitationRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          nullable: true
+        dateOfBirth:
+          type: string
+          format: date
+      additionalProperties: false
+    AgentKind:
+      enum:
+      - Extraction
+      - Coordinator
+      - Context
+      - Analysis
+      - FamilialRisk
+      - SafetyValidation
+      type: string
+    AgentStepStatus:
+      enum:
+      - Started
+      - Completed
+      - Failed
+      - ToolDenied
+      - SafeFailure
+      type: string
+    AgentTraceDto:
+      type: object
+      properties:
+        stepNumber:
+          type: integer
+          format: int32
+        agent:
+          "$ref": "#/components/schemas/AgentKind"
+        status:
+          "$ref": "#/components/schemas/AgentStepStatus"
+        toolsRequested:
+          type: array
+          items:
+            type: string
+          nullable: true
+        toolsAllowed:
+          type: array
+          items:
+            type: string
+          nullable: true
+        toolsDenied:
+          type: array
+          items:
+            type: string
+          nullable: true
+        confidence:
+          type: number
+          format: double
+        latencyMilliseconds:
+          type: integer
+          format: int64
+        outputSchemaValid:
+          type: boolean
+      additionalProperties: false
+    ApprovalAction:
+      enum:
+      - Approve
+      - ReviseAndApprove
+      - RequestInformation
+      - Reject
+      - Escalate
+      type: string
+    ApprovalContentRequest:
+      type: object
+      properties:
+        doctorNotes:
+          type: string
+          nullable: true
+        finalAdvisory:
+          type: string
+          nullable: true
+      additionalProperties: false
+    ApprovalDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        triageCaseId:
+          type: string
+          format: uuid
+        doctorId:
+          type: string
+          format: uuid
+        action:
+          "$ref": "#/components/schemas/ApprovalAction"
+        decidedAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    ApprovalRequest:
+      type: object
+      properties:
+        action:
+          "$ref": "#/components/schemas/ApprovalAction"
+        doctorNotes:
+          type: string
+          nullable: true
+        finalAdvisory:
+          type: string
+          nullable: true
+      additionalProperties: false
+    ApprovedFamilialRiskDto:
+      type: object
+      properties:
+        caseId:
+          type: string
+          format: uuid
+        screeningGuidance:
+          type: string
+          nullable: true
+        approvedAt:
+          type: string
+          format: date-time
+        disclaimer:
+          type: string
+          nullable: true
+      additionalProperties: false
+    ApprovedGuidanceDto:
+      type: object
+      properties:
+        caseId:
+          type: string
+          format: uuid
+        status:
+          "$ref": "#/components/schemas/TriageStatus"
+        finalAdvisory:
+          type: string
+          nullable: true
+        approvedAt:
+          type: string
+          format: date-time
+        disclaimer:
+          type: string
+          nullable: true
+      additionalProperties: false
+    AuditDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          nullable: true
+        resourceType:
+          type: string
+          nullable: true
+        resourceId:
+          type: string
+          format: uuid
+          nullable: true
+        outcome:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    AuditDtoPagedResult:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/AuditDto"
+          nullable: true
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false
+    AuthResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+          nullable: true
+        userType:
+          "$ref": "#/components/schemas/UserType"
+        familyRole:
+          "$ref": "#/components/schemas/FamilyRole"
+        doctorVerificationStatus:
+          "$ref": "#/components/schemas/VerificationStatus"
+        accessToken:
+          type: string
+          nullable: true
+        refreshToken:
+          type: string
+          nullable: true
+        accessTokenExpiresAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    AvailableCaseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        priority:
+          "$ref": "#/components/schemas/TriagePriority"
+        createdAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    AvailableCaseDtoPagedResult:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/AvailableCaseDto"
+          nullable: true
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false
+    CaseReviewDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        memberId:
+          type: string
+          format: uuid
+        status:
+          "$ref": "#/components/schemas/TriageStatus"
+        priority:
+          "$ref": "#/components/schemas/TriagePriority"
+        contextJson:
+          type: string
+          nullable: true
+        analysisJson:
+          type: string
+          nullable: true
+        familialRiskJson:
+          type: string
+          nullable: true
+        draftAdvisoryJson:
+          type: string
+          nullable: true
+        traces:
+          type: array
+          items:
+            "$ref": "#/components/schemas/AgentTraceDto"
+          nullable: true
+      additionalProperties: false
+    ConfirmLabReportRequest:
+      type: object
+      properties:
+        values:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ConfirmLabValueRequest"
+          nullable: true
+        confirmedFlagIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          nullable: true
+      additionalProperties: false
+    ConfirmLabValueRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        analyte:
+          type: string
+          nullable: true
+        value:
+          type: number
+          format: double
+        unit:
+          type: string
+          nullable: true
+        referenceLow:
+          type: number
+          format: double
+          nullable: true
+        referenceHigh:
+          type: number
+          format: double
+          nullable: true
+      additionalProperties: false
+    ConsentCategory:
+      enum:
+      - HereditaryFlags
+      - VitalsSummary
+      - Conditions
+      type: string
+    ConsentDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        memberId:
+          type: string
+          format: uuid
+        category:
+          "$ref": "#/components/schemas/ConsentCategory"
+        status:
+          "$ref": "#/components/schemas/ConsentStatus"
+        grantedByGuardian:
+          type: boolean
+      additionalProperties: false
+    ConsentStatus:
+      enum:
+      - NotSet
+      - Granted
+      - Revoked
+      - PendingReaffirmation
+      type: string
+    CreateEpisodeRequest:
+      type: object
+      properties:
+        symptoms:
+          type: array
+          items:
+            type: string
+          nullable: true
+        durationDays:
+          type: integer
+          format: int32
+        severity:
+          type: integer
+          format: int32
+        notes:
+          type: string
+          nullable: true
+      additionalProperties: false
+    CreateFamilyInvitationRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          nullable: true
+      additionalProperties: false
+    CreateFamilyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+      additionalProperties: false
+    CreateMemberRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+          nullable: true
+        dateOfBirth:
+          type: string
+          format: date
+        role:
+          "$ref": "#/components/schemas/FamilyRole"
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+      additionalProperties: false
+    CreateRelationshipRequest:
+      type: object
+      properties:
+        relatedMemberId:
+          type: string
+          format: uuid
+        relationshipType:
+          type: string
+          nullable: true
+        isBiological:
+          type: boolean
+      additionalProperties: false
+    CreateVitalRequest:
+      type: object
+      properties:
+        vitalType:
+          type: string
+          nullable: true
+        value:
+          type: number
+          format: double
+        unit:
+          type: string
+          nullable: true
+        measuredAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    DoctorDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        registrationNumberLastFour:
+          type: string
+          nullable: true
+        verificationStatus:
+          "$ref": "#/components/schemas/VerificationStatus"
+        specialty:
+          type: string
+          nullable: true
+      additionalProperties: false
+    DoctorDtoPagedResult:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/DoctorDto"
+          nullable: true
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false
+    EpisodeDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        memberId:
+          type: string
+          format: uuid
+        symptoms:
+          type: array
+          items:
+            type: string
+          nullable: true
+        durationDays:
+          type: integer
+          format: int32
+        severity:
+          type: integer
+          format: int32
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    EpisodeDtoPagedResult:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/EpisodeDto"
+          nullable: true
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false
+    FamilyDashboardDto:
+      type: object
+      properties:
+        membersVisible:
+          type: integer
+          format: int32
+        openCases:
+          type: integer
+          format: int32
+        awaitingDoctorReview:
+          type: integer
+          format: int32
+        approvedCases:
+          type: integer
+          format: int32
+        recordsCount:
+          type: integer
+          format: int32
+      additionalProperties: false
+    FamilyDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          nullable: true
+        members:
+          type: array
+          items:
+            "$ref": "#/components/schemas/MemberDto"
+          nullable: true
+      additionalProperties: false
+    FamilyInvitationDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        token:
+          type: string
+          nullable: true
+        expiresAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    FamilyRole:
+      enum:
+      - Head
+      - AdultMember
+      - MinorMember
+      type: string
+    HealthRecordDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        memberId:
+          type: string
+          format: uuid
+        recordType:
+          "$ref": "#/components/schemas/RecordType"
+        title:
+          type: string
+          nullable: true
+        summary:
+          type: string
+          nullable: true
+        occurredOn:
+          type: string
+          format: date
+      additionalProperties: false
+    HealthRecordDtoPagedResult:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/HealthRecordDto"
+          nullable: true
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false
+    HereditaryFlagDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        memberId:
+          type: string
+          format: uuid
+        conditionCode:
+          type: string
+          nullable: true
+        finding:
+          type: string
+          nullable: true
+        confidence:
+          type: number
+          format: double
+        manuallyConfirmed:
+          type: boolean
+      additionalProperties: false
+    LabExtractionResultDto:
+      type: object
+      properties:
+        reportId:
+          type: string
+          format: uuid
+        status:
+          "$ref": "#/components/schemas/OcrStatus"
+        valuesExtracted:
+          type: integer
+          format: int32
+        flagsExtracted:
+          type: integer
+          format: int32
+        requiresManualReview:
+          type: boolean
+      additionalProperties: false
+    LabReportDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        memberId:
+          type: string
+          format: uuid
+        originalFileName:
+          type: string
+          nullable: true
+        ocrStatus:
+          "$ref": "#/components/schemas/OcrStatus"
+        collectedAt:
+          type: string
+          format: date-time
+          nullable: true
+        values:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LabValueDto"
+          nullable: true
+        flags:
+          type: array
+          items:
+            "$ref": "#/components/schemas/HereditaryFlagDto"
+          nullable: true
+      additionalProperties: false
+    LabReportDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        memberId:
+          type: string
+          format: uuid
+        originalFileName:
+          type: string
+          nullable: true
+        ocrStatus:
+          "$ref": "#/components/schemas/OcrStatus"
+        collectedAt:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
+    LabValueDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        analyte:
+          type: string
+          nullable: true
+        value:
+          type: number
+          format: double
+        unit:
+          type: string
+          nullable: true
+        referenceLow:
+          type: number
+          format: double
+          nullable: true
+        referenceHigh:
+          type: number
+          format: double
+          nullable: true
+        wasManuallyConfirmed:
+          type: boolean
+      additionalProperties: false
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          nullable: true
+        password:
+          type: string
+          nullable: true
+      additionalProperties: false
+    MemberDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        familyId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+          nullable: true
+        dateOfBirth:
+          type: string
+          format: date
+        role:
+          "$ref": "#/components/schemas/FamilyRole"
+      additionalProperties: false
+    MemberDtoPagedResult:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/MemberDto"
+          nullable: true
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false
+    NotificationDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          nullable: true
+        caseId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    NotificationDtoPagedResult:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/NotificationDto"
+          nullable: true
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false
+    NotificationSubscriptionDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        platform:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+        lastSeenAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    NotificationSubscriptionRequest:
+      type: object
+      properties:
+        deviceToken:
+          type: string
+          nullable: true
+        platform:
+          type: string
+          nullable: true
+      additionalProperties: false
+    OcrStatus:
+      enum:
+      - Pending
+      - Processing
+      - Completed
+      - Failed
+      - ManualEntry
+      type: string
+    RecordType:
+      enum:
+      - Condition
+      - Allergy
+      - Medication
+      - Surgery
+      - Note
+      type: string
+    RefreshRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          nullable: true
+      additionalProperties: false
+    RegisterDoctorRequest:
+      type: object
+      properties:
+        registrationNumber:
+          type: string
+          nullable: true
+        specialty:
+          type: string
+          nullable: true
+      additionalProperties: false
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          nullable: true
+        password:
+          type: string
+          nullable: true
+        displayName:
+          type: string
+          nullable: true
+        userType:
+          "$ref": "#/components/schemas/UserType"
+      additionalProperties: false
+    RelationshipDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        memberId:
+          type: string
+          format: uuid
+        relatedMemberId:
+          type: string
+          format: uuid
+        relationshipType:
+          type: string
+          nullable: true
+        isBiological:
+          type: boolean
+      additionalProperties: false
+    TriageCaseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        episodeId:
+          type: string
+          format: uuid
+        memberId:
+          type: string
+          format: uuid
+        status:
+          "$ref": "#/components/schemas/TriageStatus"
+        priority:
+          "$ref": "#/components/schemas/TriagePriority"
+        createdAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    TriageCaseDtoPagedResult:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/TriageCaseDto"
+          nullable: true
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false
+    TriagePriority:
+      enum:
+      - Routine
+      - Priority
+      - Emergency
+      type: string
+    TriageStatus:
+      enum:
+      - Submitted
+      - Planning
+      - ContextReady
+      - Analysed
+      - RiskAssessed
+      - Validated
+      - LowConfidence
+      - PendingDoctorReview
+      - Claimed
+      - Approved
+      - ApprovedRevised
+      - Rejected
+      - Escalated
+      - FailedSafe
+      type: string
+    TriageStatusDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          "$ref": "#/components/schemas/TriageStatus"
+        priority:
+          "$ref": "#/components/schemas/TriagePriority"
+        failureCode:
+          type: string
+          nullable: true
+      additionalProperties: false
+    UpdateConsentRequest:
+      type: object
+      properties:
+        status:
+          "$ref": "#/components/schemas/ConsentStatus"
+      additionalProperties: false
+    UpdateFamilyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+      additionalProperties: false
+    UpdateMemberRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+          nullable: true
+        dateOfBirth:
+          type: string
+          format: date
+        role:
+          "$ref": "#/components/schemas/FamilyRole"
+      additionalProperties: false
+    UpsertHealthRecordRequest:
+      type: object
+      properties:
+        recordType:
+          "$ref": "#/components/schemas/RecordType"
+        title:
+          type: string
+          nullable: true
+        summary:
+          type: string
+          nullable: true
+        occurredOn:
+          type: string
+          format: date
+      additionalProperties: false
+    UserType:
+      enum:
+      - FamilyUser
+      - Doctor
+      - Admin
+      type: string
+    VerificationReasonRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          nullable: true
+      additionalProperties: false
+    VerificationStatus:
+      enum:
+      - Pending
+      - Verified
+      - MoreInformationRequired
+      - Rejected
+      - Suspended
+      type: string
+    VerifyDoctorRequest:
+      type: object
+      properties:
+        status:
+          "$ref": "#/components/schemas/VerificationStatus"
+        reason:
+          type: string
+          nullable: true
+      additionalProperties: false
+    VitalDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        memberId:
+          type: string
+          format: uuid
+        vitalType:
+          type: string
+          nullable: true
+        value:
+          type: number
+          format: double
+        unit:
+          type: string
+          nullable: true
+        measuredAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    VitalPointDto:
+      type: object
+      properties:
+        measuredAt:
+          type: string
+          format: date-time
+        value:
+          type: number
+          format: double
+        unit:
+          type: string
+          nullable: true
+      additionalProperties: false
+    VitalTrendDto:
+      type: object
+      properties:
+        vitalType:
+          type: string
+          nullable: true
+        points:
+          type: array
+          items:
+            "$ref": "#/components/schemas/VitalPointDto"
+          nullable: true
+      additionalProperties: false
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+- Bearer: []

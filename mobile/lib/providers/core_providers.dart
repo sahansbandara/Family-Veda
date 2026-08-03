@@ -1,0 +1,30 @@
+// [S1] Shared dependency providers.
+import 'package:family_veda/services/api/api_client.dart';
+import 'package:family_veda/services/api/auth_api.dart';
+import 'package:family_veda/services/api/mobile_api.dart';
+import 'package:family_veda/services/api/patient_api.dart';
+import 'package:family_veda/services/storage/member_preference_store.dart';
+import 'package:family_veda/services/storage/secure_token_store.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final tokenStoreProvider = Provider<TokenStore>((ref) => SecureTokenStore());
+
+final memberPreferenceStoreProvider = Provider<MemberPreferenceStore>(
+  (ref) => SecureMemberPreferenceStore(),
+);
+
+final apiClientProvider = Provider<ApiClient>(
+  (ref) => ApiClient(tokenStore: ref.watch(tokenStoreProvider)),
+);
+
+final authApiProvider = Provider<AuthApi>(
+  (ref) => DioAuthApi(ref.watch(apiClientProvider)),
+);
+
+final mobileApiProvider = Provider<MobileApi>(
+  (ref) => DioMobileApi(ref.watch(apiClientProvider)),
+);
+
+final patientApiProvider = Provider<PatientApi>(
+  (ref) => DioPatientApi(ref.watch(apiClientProvider)),
+);

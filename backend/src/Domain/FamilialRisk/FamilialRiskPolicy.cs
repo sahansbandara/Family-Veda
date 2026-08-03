@@ -1,0 +1,37 @@
+using FamilyVeda.Domain.Common;
+
+namespace FamilyVeda.Domain.FamilialRisk;
+
+public sealed record CarrierContextResult(decimal? AffectedRiskPercent, IReadOnlyList<string> UnknownParties);
+
+public static class FamilialRiskPolicy
+{
+    public static bool IsRelationshipEligible(bool isBiological) => isBiological;
+
+    public static CarrierContextResult EvaluateCarrierContext(
+        CarrierStatus knownParent,
+        CarrierStatus otherParent)
+    {
+        if (knownParent == CarrierStatus.Unknown || otherParent == CarrierStatus.Unknown)
+        {
+            var unknown = new List<string>();
+            if (knownParent == CarrierStatus.Unknown)
+            {
+                unknown.Add("knownParent");
+            }
+
+            if (otherParent == CarrierStatus.Unknown)
+            {
+                unknown.Add("otherParent");
+            }
+
+            return new CarrierContextResult(null, unknown);
+        }
+
+        var affectedRisk = knownParent == CarrierStatus.Carrier && otherParent == CarrierStatus.Carrier
+            ? 25m
+            : 0m;
+
+        return new CarrierContextResult(affectedRisk, []);
+    }
+}

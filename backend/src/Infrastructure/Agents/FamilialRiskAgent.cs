@@ -1,0 +1,27 @@
+using System.Text.Json;
+using FamilyVeda.Application.Agents;
+using FamilyVeda.Domain.Common;
+
+namespace FamilyVeda.Infrastructure.Agents;
+
+public sealed class FamilialRiskAgent(IToolDispatcher dispatcher, IOllamaClient ollamaClient) : IAgent
+{
+    private static readonly string[] Tools = ["read_consented_hereditary_flags", "read_relationship_graph", "lookup_inheritance_pattern"];
+    public AgentKind Kind => AgentKind.FamilialRisk;
+
+    public async Task<AgentRunResult> RunAsync(AgentRunContext context, CancellationToken cancellationToken)
+    {
+        var toolData = new Dictionary<string, object>();
+        foreach (var tool in Tools)
+        {
+            toolData[tool] = await dispatcher.InvokeAsync(Kind, tool, context.MemberId, context.CaseId, cancellationToken);
+        }
+
+        var result = await ollamaClient.GenerateStructuredAsync<FamilialRiskSignalOutput>(
+            "Summarise consented structured hereditary flags as a screening indication for licensed-doctor review. Report unknown parties. Never claim inheritance, calculate probabilities, read raw records, diagnose, or recommend treatment. Return JSON only.",
+            new { context = context.InputJson, toolData },
+            cancellationToken);
+        if (result.Value.Confidence is < 0 or > 1) throw new JsonException("Confidence must be between zero and one.");
+        return new AgentRunResult(Kind, JsonSerializer.Serialize(result.Value), result.Value.Confidence, Tools, Tools, [], true, result.ModelName, result.InputTokens, result.OutputTokens);
+    }
+}

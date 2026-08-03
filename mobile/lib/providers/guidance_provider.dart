@@ -1,0 +1,20 @@
+// [S4] Patient provider deliberately exposes only final approved guidance.
+import 'package:family_veda/models/approved_guidance.dart';
+import 'package:family_veda/providers/active_member_provider.dart';
+import 'package:family_veda/providers/core_providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final approvedGuidanceProvider = FutureProvider.autoDispose
+    .family<ApprovedGuidance?, String>((ref, caseId) async {
+      final memberId = ref.watch(activeMemberProvider);
+      if (memberId == null) return null;
+      return ref
+          .watch(patientApiProvider)
+          .getApprovedGuidance(caseId: caseId, memberId: memberId);
+    });
+
+final approvedFamilialRiskProvider = FutureProvider.autoDispose<ApprovedFamilialRisk?>((ref) async {
+  final memberId = ref.watch(activeMemberProvider);
+  if (memberId == null) return null;
+  return ref.watch(patientApiProvider).getApprovedFamilialRisk(memberId);
+});
