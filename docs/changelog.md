@@ -4,6 +4,13 @@ Format: reverse chronological. One entry per meaningful milestone, not per commi
 
 ## Unreleased
 
+### 2026-08-04 — Repository published
+
+- Created **https://github.com/sahansbandara/Family-Veda** — public, described, 20 topics.
+- Pushed `main` and created the `develop` integration branch, per the blueprint branch strategy.
+- CI green on both branches. Layer jobs are guarded by a scaffold check and skip with a notice until each project lands at the W2 gate.
+- Branch protection is **not** yet enabled — it is a W1 group task (`agent/TODO.md`), because requiring a peer review before the other three members have repository access would lock the repository.
+
 ### 2026-08-04 — Workspace converted to the Family Veda project
 
 - Removed universal-agent-template scaffolding: bootstrap prompts, template manifest, duplicated `claude/skills` tree, `.gemini/` config, examples, benchmarks and generic templates.

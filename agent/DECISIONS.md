@@ -92,6 +92,20 @@ Working decision log. Formal, report-grade ADRs live in `docs/adr/` (ADR-001 …
 
 ---
 
+## 2026-08-04 — Project repository created
+
+**Decision:** the project lives at **https://github.com/sahansbandara/Family-Veda**, public, with `main` (protected, always deployable) and `develop` (integration) already created.
+
+**Reason:** the blueprint's branch strategy needs both branches to exist before feature branches start in W1. The repository is public so the evaluator can be granted access without friction and the link can be submitted directly.
+
+**Alternatives considered:** private repository with per-user collaborator access (rejected — adds friction for the evaluator and for the lecturer's access requirement, and access must be maintained until 21 Oct 2026 regardless) · continuing in the `universal-agent-project-template` repository (rejected — the template is a separate reusable artefact; the old remote is retained locally as `template`).
+
+**Risk:** a public repository is visible to other groups before submission. Accepted deliberately — the marks depend on the viva and on individual `git log --author` evidence, neither of which is transferable by copying the repository. **Consequence to manage:** never commit real patient data, real SLMC numbers, credentials, or deployment secrets. Everything in this repository is world-readable from the moment it is pushed.
+
+**Status:** Accepted.
+
+---
+
 ## Open decisions
 
 | # | Question | Owner | Decide by |
