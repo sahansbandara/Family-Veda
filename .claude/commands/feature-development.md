@@ -1,41 +1,34 @@
 ---
 name: feature-development
-description: Full feature implementation workflow — research, plan, TDD, review, commit.
+description: Full feature implementation workflow for Family Veda — ownership check, plan, TDD, implement, review, security, commit.
 allowed_tools: ["Bash", "Read", "Write", "Edit", "Grep", "Glob"]
 ---
 
 # /feature-development
 
-Use this workflow for implementing new features.
-
-## Goal
-
-Standard feature implementation workflow with research-first, TDD, and code review.
+Implement one feature slice end to end. Take the next item from `agent/TODO.md`.
 
 ## Pipeline
 
-1. **Research** — Search GitHub, docs, and package registries for existing solutions before writing code.
-2. **Plan** — Use **planner** agent. Generate PRD, architecture, task list. Identify risks.
-3. **TDD** — Use **tdd-guide** agent. Write tests first (RED), implement (GREEN), refactor (IMPROVE). Target 80%+ coverage.
-4. **Implement** — Use **implementer** agent. Follow the plan. Many small files > few large files.
-5. **Review** — Use **code-reviewer** agent. Address CRITICAL and HIGH issues.
-6. **Security** — Use **security-reviewer** agent for auth, input, API, or sensitive data changes.
-7. **Commit** — Conventional commits. Review diff before committing.
+0. **Preflight** — run `rules/common/agent-preflight.md`. Report the preflight line.
+1. **Ownership check** — is every file you will touch tagged for this member, or `⚠ SHARED`? If it belongs to someone else, stop and ask.
+2. **Skill check** — invoke the matching skill before acting: `agentic-triage` (agents) · `clinical-safety` (anything patient-facing) · `database-api` (schema or contract) · `frontend-design` (UI).
+3. **Plan** — `planner` agent for anything spanning more than one layer. Name the risks and the phases.
+4. **TDD** — `tdd-guide` agent. RED → GREEN → REFACTOR. 80%+ coverage on your own service layer.
+5. **Implement** — `implementer` agent. Smallest change that passes the test. Many small files over few large.
+6. **Review** — `code-reviewer` agent. Fix CRITICAL and HIGH before merge.
+7. **Security** — `security-reviewer` agent for anything touching auth, consent, grants, user input, endpoints, agent tools, or audit.
+8. **Commit** — `workflows/commit.md`. Conventional commit with your owner scope: `feat(s3): …`.
+9. **PR** — into `develop`, 1 approving review, green CI.
 
-## Common Files
+## Remember
 
-- `src/**`
-- `**/*.test.*`
-- `**/api/**`
-- `agent/TODO.md`
+- A feature slice spans **API + DB + React + Flutter + agent** where applicable — that is the allocation rule, and the individual marks depend on it.
+- Loading, empty, error and success states are part of the slice, not a follow-up.
+- Search, filter, sort and pagination are part of any list view.
+- Schema change → take the migration lock first.
+- After the W5 scope freeze, new features go to `docs/FUTURE_WORK.md`, not into code.
 
-## Typical Commit Signals
+## Files typically touched
 
-- Add feature implementation
-- Add tests for feature
-- Update documentation
-
-## Notes
-
-- Treat this as a scaffold, not a hard-coded script.
-- Update the command if the workflow evolves.
+`backend/src/**` · `web/src/**` · `mobile/lib/**` · `backend/tests/**` · `agent/TODO.md` · the relevant `docs/*.md`

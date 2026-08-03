@@ -1,7 +1,65 @@
-# Environment Variables
+# Environment Variables — Family Veda
 
-Do not store actual secret values here. Store names and purpose only.
+**Names and purpose only. Never store actual secret values in this file, in any Markdown file, or in git.**
+
+Local values go in `.env` (gitignored). Hosted values go in the platform's environment settings.
+
+## Backend — ASP.NET Core
 
 | Name | Purpose | Required | Environment |
 |---|---|---|---|
-|  |  |  |  |
+| `ConnectionStrings__DefaultConnection` | PostgreSQL connection string | Yes | all |
+| `ASPNETCORE_ENVIRONMENT` | `Development` / `Production` | Yes | all |
+| `ASPNETCORE_URLS` | Bind address and port | Hosted only | production |
+| `Jwt__Issuer` | JWT issuer claim | Yes | all |
+| `Jwt__Audience` | JWT audience claim | Yes | all |
+| `Jwt__Key` | **JWT signing key — secret** | Yes | all |
+| `Jwt__AccessTokenMinutes` | Access token lifetime | Yes | all |
+| `Jwt__RefreshTokenDays` | Refresh token lifetime | Yes | all |
+| `Cors__AllowedOrigins` | Comma-separated web origins | Yes | all |
+| `Ollama__BaseUrl` | Ollama endpoint, e.g. `http://localhost:11434` | Yes | all |
+| `Ollama__Model` | Model name, e.g. `llama3.1:8b` | Yes | all |
+| `Ollama__TimeoutSeconds` | Per-call timeout before safe failure | Yes | all |
+| `Agents__ConfidenceThreshold` | Below this → `LOW_CONFIDENCE`, draft hidden | Yes | all |
+| `Ocr__Engine` | `Tesseract` or `MlKit` | Yes | all |
+| `Ocr__TesseractDataPath` | Tesseract language data path | If Tesseract | all |
+| `Storage__LabReportPath` | Where uploaded lab report files are stored | Yes | all |
+| `Storage__MaxUploadBytes` | Upload size limit | Yes | all |
+| `Fcm__ServerKey` | **Firebase Cloud Messaging server key — secret** | Yes | all |
+| `Fcm__ProjectId` | Firebase project id | Yes | all |
+| `Twilio__AccountSid` | **Twilio SID — secret** (SMS fallback) | Optional | all |
+| `Twilio__AuthToken` | **Twilio auth token — secret** | Optional | all |
+| `Twilio__FromNumber` | Sender number | Optional | all |
+| `Sla__DoctorResponseHours` | SLA before release to the shared pool (6) | Yes | all |
+| `Grants__ExpiryHours` | Case grant lifetime (48) | Yes | all |
+
+## Web — React (Vite)
+
+| Name | Purpose | Required | Environment |
+|---|---|---|---|
+| `VITE_API_BASE_URL` | API base, e.g. `https://api.familyveda.app/api/v1` | Yes | all |
+| `VITE_APP_ENV` | `development` / `production` | Yes | all |
+
+> Vite inlines every `VITE_*` variable into the client bundle. **Never put a secret in one.**
+
+## Mobile — Flutter
+
+| Name | Purpose | Required | Environment |
+|---|---|---|---|
+| `API_BASE_URL` | Passed with `--dart-define` at build time | Yes | all |
+| `APP_ENV` | `development` / `production` | Yes | all |
+
+```bash
+flutter run --dart-define=API_BASE_URL=https://api.familyveda.app/api/v1 --dart-define=APP_ENV=development
+```
+
+Firebase configuration comes from `google-services.json`, which is **not committed**.
+
+## Rules
+
+1. `.env` is gitignored. `.env.example` carries names and placeholder text only.
+2. Anything marked **secret** above never appears in git, in Markdown, in a screenshot, or in the report.
+3. Before the first deploy, scan history for leaked keys.
+4. Rotate any key that is ever pasted into a chat, an issue, or a commit message.
+5. Hosted secrets are set in the platform's environment settings, never in a config file in the repository.
+6. `google-services.json` and any signing keystore are gitignored.

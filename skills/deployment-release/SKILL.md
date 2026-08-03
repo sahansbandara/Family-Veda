@@ -1,78 +1,68 @@
 ---
 name: deployment-release
-description: Select a deployment platform, prepare releases, verify environments, deploy with approval, and support rollback.
-user-invocable: true
+description: Use when deploying the API, database, React web app or Flutter APK, preparing the evaluator access package, verifying a deployed build, or rolling back. Fires on "deploy", "release", "APK", "hosting", "environment variables in production".
 ---
 
-# Deployment Release
+# Deployment and Release
 
-## When to use
+Full detail: `docs/DEPLOYMENT.md`. Workflow: `workflows/deploy.md`. Gate: **W8 — deployed and reachable by the evaluator.**
 
-Use for hosting selection, environment configuration, CI/CD, domains, previews, production releases, rollback, and health verification.
+Platforms are already chosen in principle (free tier: Render/Azure + Neon/Supabase + Vercel/Netlify). The pair is confirmed by **W7**. Deployment is a graded deliverable and is **never skipped**.
 
-## Platform selection
+## Approval
 
-Consider:
+Group leader (S3) plus S1. Deploying is a high-risk action — state the rollback before you start.
 
-- Existing project platform
-- Vercel/serverless
-- Railway/managed application hosting
-- Heroku
-- Cloudflare
-- Docker VPS
-- Coolify
-- Other project-specific platforms
+## Order
 
-Consult `rules/coolify.md` when self-hosting is a candidate.
-
-## Coolify fit
-
-Coolify is a strong candidate when the application needs:
-
-- Docker deployment
-- Continuous Telegram bot or worker execution
-- Persistent backend services
-- Databases on a controlled VPS
-- Multiple self-hosted services
-- Portability and infrastructure ownership
-
-Do not select Coolify only because it is open source. Account for server administration, backups, security, monitoring, and recovery.
-
-## Workflow
-
-1. Confirm `PROJECT_MODE`.
-2. Identify runtime and persistence requirements.
-3. Compare suitable deployment options.
-4. Record the selected option and rejected alternatives.
-5. Define environments.
-6. List environment-variable names.
-7. Define build and start commands.
-8. Define health checks.
-9. Define backup and rollback.
-10. Run build/test checks.
-11. Request approval.
-12. Deploy.
-13. Verify production.
-14. Record the result.
-
-## Output format
-
-```text
-DEPLOYMENT PLAN:
-- Platform:
-- Reason:
-- Runtime:
-- Environments:
-- Build:
-- Start:
-- Data/volumes:
-- Health checks:
-- Monitoring:
-- Backup:
-- Rollback:
-- Approval:
+```
+1. Provision the database
+2. Apply migrations against it
+3. Run the synthetic seed
+4. Deploy the API           → verify /swagger + one authenticated endpoint
+5. Deploy React             → verify login end to end
+6. Build the signed APK     → install and test on a PHYSICAL Android device
+7. Verify all five role credentials against the DEPLOYED stack
+8. Record the URLs in the report and agent/DECISIONS.md
 ```
 
-## Stop conditions
+## Pre-deploy checklist
 
-Stop before deployment, DNS changes, secret changes, infrastructure changes, or production database actions without explicit approval.
+- [ ] CI green on `main`
+- [ ] **History scanned for leaked secrets** — rotate anything ever exposed
+- [ ] `.env` gitignored; no secret in any committed config
+- [ ] Environment variables set in the platform, matching `docs/ENV_VARS.md`
+- [ ] HTTPS enforced; HTTP redirects
+- [ ] CORS restricted to the deployed web origin
+- [ ] Rate limiting active on `/auth/*`
+- [ ] Generic 500s — no stack traces in production
+- [ ] Synthetic seed loaded, no real patient data anywhere
+
+## Evaluator access package
+
+- [ ] Deployed web URL
+- [ ] API base URL + Swagger URL
+- [ ] Repository link with evaluator access granted
+- [ ] APK download link
+- [ ] Test credentials for all five roles
+- [ ] Reproducible local setup in `README.md`
+- [ ] Access maintained until **21 October 2026**
+
+Credentials and URLs go in the submitted report — **never in this repository**.
+
+## The Ollama caveat — say it plainly
+
+The deployed API cannot run the agent workflow without a reachable Ollama instance, and Ollama is not deployed. The demonstration runs it locally. This is a consequence of ADR-006, not an oversight. Never imply the hosted API performs live inference.
+
+## Rollback
+
+| Failure | Action |
+|---|---|
+| Bad API deploy | Redeploy the previous build from the host's history |
+| Bad migration | Add a **new** corrective migration — never edit a pushed one |
+| Web broken | Redeploy the previous Vercel/Netlify build |
+| APK broken | Rebuild from the last green `main` commit |
+
+## After deploying
+
+Verify the deployed URLs **daily** through W9 (risk R6 — free tiers sleep). Keep a fully working local stack ready as a demo fallback. Do not delete projects, rotate evaluator credentials, or let a free-tier database be reclaimed for inactivity before 21 October 2026.

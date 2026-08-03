@@ -183,7 +183,7 @@ Component test with RTL + JSDOM cannot:
 - Test browser-native animation, CSS transitions
 - Test cross-frame interactions (iframes, popups)
 
-For those, use Playwright Component Testing or end-to-end Playwright/Cypress runs. See [e2e-testing skill](../../skills/e2e-testing/SKILL.md).
+Family Veda does not run an automated E2E suite. Those paths are covered by the documented manual test cases in `docs/TESTING.md` (M1–M8), executed before the W7 gate and again before the demonstration.
 
 ## Coverage Targets
 
@@ -205,4 +205,4 @@ For those, use Playwright Component Testing or end-to-end Playwright/Cypress run
 
 ## Skill Reference
 
-See `skills/react-testing/SKILL.md` for end-to-end test examples, MSW patterns, and accessibility test scaffolding.
+See `docs/TESTING.md` for the project test plan, the 8 priority cases, and the manual test log. UI conventions that tests assert against are in `design.md`.
