@@ -169,6 +169,39 @@ cd mobile && flutter pub get && flutter run
 
 > Setup commands are written against the structure defined in blueprint §14.1.2. They become runnable as each project is scaffolded during W2.
 
+## Live demo access
+
+- Web: <https://family-veda-web.vercel.app>
+- API health: <https://family-veda-api.onrender.com/health>
+- Mobile API base URL: `https://family-veda-api.onrender.com/api/v1`
+
+All accounts below are synthetic and use the same demo password.
+
+| Role | Email |
+|---|---|
+| Family Head | `demo-head@example.invalid` |
+| Adult Member | `demo-member@example.invalid` |
+| Verified Doctor | `demo-doctor@example.invalid` |
+| Pending Doctor | `demo-pending@example.invalid` |
+| Clinic Admin | `demo-admin@example.invalid` |
+
+The password is intentionally not committed. On the deployment owner's Mac, copy it from Keychain without printing it into terminal history:
+
+```bash
+security find-generic-password \
+  -a demo-evaluator \
+  -s FamilyVedaDemoPassword \
+  -w | pbcopy
+```
+
+Paste it into the app, then clear the clipboard immediately:
+
+```bash
+pbcopy </dev/null
+```
+
+Avoid retrieving it while screen-sharing or recording. Share the password with evaluators through a private channel. Never place it in Git, issues, screenshots or chat history.
+
 ## Testing
 
 ```bash
