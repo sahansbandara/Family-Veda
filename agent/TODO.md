@@ -46,13 +46,14 @@ Status reconciled against the repository on 2026-08-04. This file separates impl
 - [x] Neon CLI authenticated; organization `Sahan` and project `SLIIT Project` are accessible
 - [x] Render CLI authenticated; workspace `SLIIT` is selected
 - [x] Vercel CLI authenticated; team `Sithmi` is accessible
-- [ ] Provision PostgreSQL 16 for production — existing Neon project is PostgreSQL 18, while the verified project target is 16
+- [x] Provision separate Neon PostgreSQL 16 production project and apply all six existing EF Core migrations
 - [ ] Add payment information to Render workspace — blueprint validation returns `need_payment_info`
 - [ ] Create the Family Veda Render service and Vercel project
 - [ ] Configure production database URL, JWT key, frontend origin/API URL, persistent storage and Data Protection path in provider dashboards
 - [ ] Provide a reachable user-controlled Ollama endpoint; hosted LLM APIs are prohibited by ADR-006
 - [ ] Configure Firebase service account/project if push delivery is required
-- [ ] Run production migration, health, role-flow and log verification
+- [x] Verify production migration state independently with `dotnet ef migrations list`
+- [ ] Run deployed health, role-flow and log verification
 
 Never place production secrets in this file or chat.
 

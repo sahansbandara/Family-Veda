@@ -214,6 +214,20 @@ Working decision log. Formal, report-grade ADRs live in `docs/adr/` (ADR-001 …
 
 ---
 
+## 2026-08-04 — Provision production on a separate PostgreSQL 16 project
+
+**Decision:** keep the existing Neon PostgreSQL 18 project unchanged and provision a separate production project on PostgreSQL 16, matching the tested runtime and blueprint.
+
+**Reason:** Neon projects cannot be downgraded in place. Deploying against PostgreSQL 18 would introduce an untested database version into the graded stack, while replacing the existing project would risk unrelated data and configuration.
+
+**Alternatives considered:** use the existing PostgreSQL 18 project (rejected: runtime mismatch) · delete and recreate the existing project (rejected: destructive and unnecessary) · change the project baseline to PostgreSQL 18 (rejected: no design or test evidence supports that change).
+
+**Consequences:** all six committed migrations are applied to the PostgreSQL 16 production database. Render remains the next deployment gate; its required persistent disk needs workspace payment information. Vercel deployment follows only after the API URL and CORS origin are known.
+
+**Status:** Accepted under the user's approved Render + Neon + Vercel deployment plan.
+
+---
+
 ## Open decisions
 
 | # | Question | Owner | Decide by |
