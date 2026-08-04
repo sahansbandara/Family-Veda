@@ -6,6 +6,7 @@ import 'package:family_veda/providers/core_providers.dart';
 import 'package:family_veda/services/api/auth_api.dart';
 import 'package:family_veda/services/storage/member_preference_store.dart';
 import 'package:family_veda/services/storage/secure_token_store.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,9 +14,14 @@ class _FakeTokenStore implements TokenStore {
   final expirations = StreamController<void>.broadcast();
   String? accessToken;
   String? refreshToken;
+  Object? readRefreshTokenError;
+  Object? clearError;
+  bool clearAttempted = false;
 
   @override
   Future<void> clear() async {
+    clearAttempted = true;
+    if (clearError case final error?) throw error;
     accessToken = null;
     refreshToken = null;
   }
@@ -30,7 +36,10 @@ class _FakeTokenStore implements TokenStore {
   Future<String?> readAccessToken() async => accessToken;
 
   @override
-  Future<String?> readRefreshToken() async => refreshToken;
+  Future<String?> readRefreshToken() async {
+    if (readRefreshTokenError case final error?) throw error;
+    return refreshToken;
+  }
 
   @override
   Stream<void> get sessionExpirations => expirations.stream;
@@ -76,6 +85,32 @@ class _FakeMemberPreferenceStore implements MemberPreferenceStore {
 }
 
 void main() {
+  test(
+    'secure storage failure fails closed instead of hanging startup',
+    () async {
+      final store = _FakeTokenStore()
+        ..readRefreshTokenError = PlatformException(
+          code: '-34018',
+          message: 'A required entitlement isn\'t present.',
+        )
+        ..clearError = Exception('synthetic secure storage cleanup failure');
+      final controller = AuthController(
+        authApi: _FakeAuthApi(),
+        tokenStore: store,
+      );
+      addTearDown(() {
+        controller.dispose();
+        store.expirations.close();
+      });
+
+      await pumpEventQueue();
+
+      expect(store.clearAttempted, isTrue);
+      expect(controller.state.status, AuthStatus.unauthenticated);
+      expect(controller.state.errorMessage, isNull);
+    },
+  );
+
   test('session expiration immediately deauthenticates route state', () async {
     final store = _FakeTokenStore();
     final controller = AuthController(

@@ -39,12 +39,12 @@ class AuthController extends StateNotifier<AuthState> {
   late final StreamSubscription<void> _expirationSubscription;
 
   Future<void> _restoreSession() async {
-    final refreshToken = await _tokenStore.readRefreshToken();
-    if (refreshToken == null || refreshToken.isEmpty) {
-      state = const AuthState.unauthenticated();
-      return;
-    }
     try {
+      final refreshToken = await _tokenStore.readRefreshToken();
+      if (refreshToken == null || refreshToken.isEmpty) {
+        state = const AuthState.unauthenticated();
+        return;
+      }
       final tokens = await _authApi.refresh(refreshToken);
       await _tokenStore.writeTokens(
         accessToken: tokens.accessToken,
@@ -52,7 +52,11 @@ class AuthController extends StateNotifier<AuthState> {
       );
       state = const AuthState.authenticated();
     } on Object {
-      await _tokenStore.clear();
+      try {
+        await _tokenStore.clear();
+      } on Object {
+        // A keychain failure must not leave startup blocked in loading state.
+      }
       state = const AuthState.unauthenticated();
     }
   }
