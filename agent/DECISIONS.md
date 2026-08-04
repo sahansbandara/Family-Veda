@@ -242,6 +242,20 @@ Working decision log. Formal, report-grade ADRs live in `docs/adr/` (ADR-001 …
 
 ---
 
+## 2026-08-04 — Use Render free plan and defer push notifications
+
+**Decision:** deploy the API on Render's free plan without a persistent disk. Store uploaded lab-report files and Data Protection keys in the container's writable `/app` directories. Omit FCM deployment secrets and defer APNs/FCM notification delivery.
+
+**Reason:** the user explicitly cannot fund paid subscriptions. Render persistent disks require paid compute, and Apple push delivery also requires external provider configuration. Neon remains the persistent source of structured clinical data; core authentication, records, OCR, triage and doctor-approval workflows remain demonstrable.
+
+**Alternatives considered:** retain the paid persistent disk (rejected: violates the zero-cost constraint) · disable the entire deployment (rejected: prevents evaluator access to the core workflow) · substitute a hosted LLM or notification provider (rejected: violates ADR-006 or introduces another paid dependency).
+
+**Consequences:** uploaded files and encrypted notification-token keys are ephemeral and may be lost when Render restarts. Production push configuration is intentionally absent and distributed clients do not include Firebase configuration, so token registration is not expected; the subscription endpoint itself remains available. Neon metadata can outlive an ephemeral file and must not be presented as proof that the file remains retrievable or securely erased. The demo must use synthetic uploads that can be repeated, and the report must state this free-tier limitation plainly. Hosted inference uses an unreachable loopback Ollama URL and fails safely; Ollama runs only on the local demo machine as already documented.
+
+**Status:** Accepted with explicit user direction; supersedes the earlier requirement for a Render persistent disk.
+
+---
+
 ## Open decisions
 
 | # | Question | Owner | Decide by |

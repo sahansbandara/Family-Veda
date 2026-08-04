@@ -28,12 +28,12 @@ Local values go in `.env` (gitignored). Hosted values go in the platform's envir
 | `Ocr__MaxOutputCharacters` | Maximum accepted OCR text size | Yes | all |
 | `Storage__LabReportPath` | Where uploaded lab report files are stored | Yes | all |
 | `Storage__MaxUploadBytes` | Upload size limit | Yes | all |
-| `Fcm__ServiceAccountJson` | **Firebase service-account JSON — secret; FCM HTTP v1 only** | Yes | all |
-| `Fcm__ProjectId` | Firebase project id | Yes | all |
+| `Fcm__ServiceAccountJson` | **Firebase service-account JSON — secret; FCM HTTP v1 only** | If push delivery is enabled | all |
+| `Fcm__ProjectId` | Firebase project id | If push delivery is enabled | all |
 | `Database__MigrateOnStartup` | Apply EF migrations at API startup | Hosted only | production |
 | `Seed__Enabled` | Enable idempotent synthetic demonstration seed | Hosted/demo only | production/demo |
 | `Seed__DefaultPassword` | **Shared initial demo password — secret** | If seed enabled | production/demo |
-| `DataProtection__KeysPath` | Persistent key-ring directory for encrypted device tokens | Yes | hosted |
+| `DataProtection__KeysPath` | Key-ring directory for encrypted device tokens; persistent storage required when push delivery is enabled | If push delivery is enabled | hosted |
 | `Twilio__AccountSid` | **Twilio SID — secret** (SMS fallback) | Optional | all |
 | `Twilio__AuthToken` | **Twilio auth token — secret** | Optional | all |
 | `Twilio__FromNumber` | Sender number | Optional | all |
