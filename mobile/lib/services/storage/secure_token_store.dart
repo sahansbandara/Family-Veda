@@ -1,6 +1,7 @@
 // [S1] Identity, Family & Consent.
 import 'dart:async';
 
+import 'package:family_veda/services/storage/logout_cleanup_marker_store.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 abstract interface class TokenStore {
@@ -12,15 +13,23 @@ abstract interface class TokenStore {
   });
   Future<void> clear();
   Future<void> expireSession();
+  Future<bool> isCleanupPending();
+  Future<void> markCleanupPending();
+  Future<void> clearCleanupPending();
   Stream<void> get sessionExpirations;
 }
 
 class SecureTokenStore implements TokenStore {
-  SecureTokenStore({FlutterSecureStorage? storage})
-    : _storage = storage ?? const FlutterSecureStorage();
+  SecureTokenStore({
+    FlutterSecureStorage? storage,
+    LogoutCleanupMarkerStore? cleanupMarkerStore,
+  }) : _storage = storage ?? const FlutterSecureStorage(),
+       _cleanupMarkerStore =
+           cleanupMarkerStore ?? FileLogoutCleanupMarkerStore();
 
   static const _refreshTokenKey = 'family_veda_refresh_token';
   final FlutterSecureStorage _storage;
+  final LogoutCleanupMarkerStore _cleanupMarkerStore;
   final StreamController<void> _sessionExpirations =
       StreamController<void>.broadcast();
   String? _accessToken;
@@ -48,9 +57,36 @@ class SecureTokenStore implements TokenStore {
 
   @override
   Future<void> expireSession() async {
-    await clear();
+    try {
+      await markCleanupPending();
+    } on Object {
+      // In-memory expiration still proceeds if preference storage is unavailable.
+    }
+    var cleared = false;
+    try {
+      await clear();
+      cleared = true;
+    } on Object {
+      // A 401 must always close in-memory auth even if Keychain is unavailable.
+    }
+    if (cleared) {
+      try {
+        await clearCleanupPending();
+      } on Object {
+        // A stale marker fails closed on next launch.
+      }
+    }
     _sessionExpirations.add(null);
   }
+
+  @override
+  Future<bool> isCleanupPending() => _cleanupMarkerStore.isPending();
+
+  @override
+  Future<void> markCleanupPending() => _cleanupMarkerStore.markPending();
+
+  @override
+  Future<void> clearCleanupPending() => _cleanupMarkerStore.clear();
 
   @override
   Stream<void> get sessionExpirations => _sessionExpirations.stream;

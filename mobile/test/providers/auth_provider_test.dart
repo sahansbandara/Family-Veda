@@ -16,20 +16,41 @@ class _FakeTokenStore implements TokenStore {
   String? refreshToken;
   Object? readRefreshTokenError;
   Object? clearError;
+  Object? writeTokensError;
+  Object? markCleanupError;
+  Object? clearCleanupError;
   bool clearAttempted = false;
+  bool cleanupPending = false;
 
   @override
   Future<void> clear() async {
     clearAttempted = true;
-    if (clearError case final error?) throw error;
     accessToken = null;
+    if (clearError case final error?) throw error;
     refreshToken = null;
   }
 
   @override
+  Future<void> clearCleanupPending() async {
+    if (clearCleanupError case final error?) throw error;
+    cleanupPending = false;
+  }
+
+  @override
   Future<void> expireSession() async {
+    cleanupPending = true;
     await clear();
+    cleanupPending = false;
     expirations.add(null);
+  }
+
+  @override
+  Future<bool> isCleanupPending() async => cleanupPending;
+
+  @override
+  Future<void> markCleanupPending() async {
+    if (markCleanupError case final error?) throw error;
+    cleanupPending = true;
   }
 
   @override
@@ -50,41 +71,93 @@ class _FakeTokenStore implements TokenStore {
     required String refreshToken,
   }) async {
     this.accessToken = accessToken;
+    if (writeTokensError case final error?) throw error;
     this.refreshToken = refreshToken;
   }
 }
 
 class _FakeAuthApi implements AuthApi {
+  String userId = 'synthetic-user-a';
+  Object? loginError;
+  Object? logoutError;
+  bool logoutAttempted = false;
+  bool refreshAttempted = false;
+
   @override
-  Future<void> logout() async {}
+  Future<void> logout() async {
+    logoutAttempted = true;
+    if (logoutError case final error?) throw error;
+  }
 
   @override
   Future<AuthTokens> login({
     required String email,
     required String password,
-  }) async => const AuthTokens(accessToken: 'access', refreshToken: 'refresh');
+  }) async {
+    if (loginError case final error?) throw error;
+    return AuthTokens(
+      userId: userId,
+      accessToken: 'access',
+      refreshToken: 'refresh',
+    );
+  }
 
   @override
-  Future<AuthTokens> refresh(String refreshToken) async =>
-      const AuthTokens(accessToken: 'new-access', refreshToken: 'new-refresh');
+  Future<AuthTokens> refresh(String refreshToken) async {
+    refreshAttempted = true;
+    return AuthTokens(
+      userId: userId,
+      accessToken: 'new-access',
+      refreshToken: 'new-refresh',
+    );
+  }
 }
 
 class _FakeMemberPreferenceStore implements MemberPreferenceStore {
-  String? memberId;
+  final memberIds = <String, String>{};
+  Object? clearError;
+  bool clearAttempted = false;
 
   @override
-  Future<void> clearActiveMemberId() async => memberId = null;
+  Future<void> clearActiveMemberId({required String userId}) async {
+    clearAttempted = true;
+    if (clearError case final error?) throw error;
+    memberIds.remove(userId);
+  }
 
   @override
-  Future<String?> readActiveMemberId() async => memberId;
+  Future<String?> readActiveMemberId({required String userId}) async =>
+      memberIds[userId];
 
   @override
-  Future<void> writeActiveMemberId(String memberId) async {
-    this.memberId = memberId;
+  Future<void> writeActiveMemberId({
+    required String userId,
+    required String memberId,
+  }) async {
+    memberIds[userId] = memberId;
   }
 }
 
 void main() {
+  test('stored refresh token restores account-scoped session', () async {
+    final store = _FakeTokenStore()..refreshToken = 'stored-refresh';
+    final controller = AuthController(
+      authApi: _FakeAuthApi(),
+      tokenStore: store,
+    );
+    addTearDown(() {
+      controller.dispose();
+      store.expirations.close();
+    });
+
+    await pumpEventQueue();
+
+    expect(controller.state.status, AuthStatus.authenticated);
+    expect(controller.state.userId, 'synthetic-user-a');
+    expect(store.accessToken, 'new-access');
+    expect(store.refreshToken, 'new-refresh');
+  });
+
   test(
     'secure storage failure fails closed instead of hanging startup',
     () async {
@@ -134,6 +207,200 @@ void main() {
     expect(controller.state.errorMessage, contains('expired'));
   });
 
+  test(
+    'login failure returns patient-safe error and stays signed out',
+    () async {
+      final store = _FakeTokenStore();
+      final authApi = _FakeAuthApi()
+        ..loginError = Exception('synthetic network failure');
+      final controller = AuthController(authApi: authApi, tokenStore: store);
+      addTearDown(() {
+        controller.dispose();
+        store.expirations.close();
+      });
+
+      final result = await controller.login(
+        email: 'synthetic@example.test',
+        password: 'password',
+      );
+
+      expect(result, isFalse);
+      expect(controller.state.status, AuthStatus.unauthenticated);
+      expect(controller.state.errorMessage, contains('Could not connect'));
+    },
+  );
+
+  test('failed token persistence removes partial bearer token', () async {
+    final store = _FakeTokenStore()
+      ..writeTokensError = PlatformException(
+        code: '-34018',
+        message: 'A required entitlement isn\'t present.',
+      );
+    final controller = AuthController(
+      authApi: _FakeAuthApi(),
+      tokenStore: store,
+    );
+    addTearDown(() {
+      controller.dispose();
+      store.expirations.close();
+    });
+
+    final result = await controller.login(
+      email: 'synthetic@example.test',
+      password: 'password',
+    );
+
+    expect(result, isFalse);
+    expect(store.clearAttempted, isTrue);
+    expect(store.accessToken, isNull);
+    expect(controller.state.status, AuthStatus.unauthenticated);
+  });
+
+  test('logout clears local tokens when server revocation fails', () async {
+    final store = _FakeTokenStore()
+      ..accessToken = 'stored-access'
+      ..refreshToken = 'stored-refresh';
+    final authApi = _FakeAuthApi()
+      ..logoutError = Exception('synthetic revocation failure');
+    final controller = AuthController(authApi: authApi, tokenStore: store);
+    addTearDown(() {
+      controller.dispose();
+      store.expirations.close();
+    });
+    await pumpEventQueue();
+
+    await controller.logout();
+
+    expect(authApi.logoutAttempted, isTrue);
+    expect(store.accessToken, isNull);
+    expect(store.refreshToken, isNull);
+    expect(controller.state.status, AuthStatus.unauthenticated);
+  });
+
+  test('Keychain cleanup failure cannot keep logout authenticated', () async {
+    final store = _FakeTokenStore()
+      ..accessToken = 'stored-access'
+      ..refreshToken = 'stored-refresh'
+      ..clearError = PlatformException(
+        code: '-34018',
+        message: 'A required entitlement isn\'t present.',
+      );
+    final controller = AuthController(
+      authApi: _FakeAuthApi(),
+      tokenStore: store,
+    );
+    addTearDown(() {
+      controller.dispose();
+      store.expirations.close();
+    });
+    await pumpEventQueue();
+    expect(controller.state.status, AuthStatus.authenticated);
+
+    await expectLater(controller.logout(), completes);
+
+    expect(store.clearAttempted, isTrue);
+    expect(store.accessToken, isNull);
+    expect(controller.state.status, AuthStatus.unauthenticated);
+  });
+
+  test('combined logout failures lock session pending cleanup', () async {
+    final store = _FakeTokenStore()
+      ..accessToken = 'stored-access'
+      ..refreshToken = 'stored-refresh'
+      ..clearError = PlatformException(
+        code: '-34018',
+        message: 'A required entitlement isn\'t present.',
+      );
+    final authApi = _FakeAuthApi()
+      ..logoutError = Exception('synthetic revocation failure');
+    final memberStore = _FakeMemberPreferenceStore();
+    final container = ProviderContainer(
+      overrides: [
+        tokenStoreProvider.overrideWithValue(store),
+        authApiProvider.overrideWithValue(authApi),
+        memberPreferenceStoreProvider.overrideWithValue(memberStore),
+      ],
+    );
+    addTearDown(() {
+      container.dispose();
+      store.expirations.close();
+    });
+    container.read(authLifecycleProvider);
+    await pumpEventQueue();
+    container.read(activeMemberProvider.notifier).state = 'member-user-a';
+    expect(container.read(authProvider).status, AuthStatus.authenticated);
+
+    final result = await container.read(authProvider.notifier).logout();
+    await pumpEventQueue();
+
+    expect(result, isFalse);
+    expect(container.read(authProvider).status, AuthStatus.cleanupRequired);
+    expect(container.read(activeMemberProvider), isNull);
+    expect(store.refreshToken, isNotNull);
+    expect(store.cleanupPending, isTrue);
+  });
+
+  test('pending logout cleanup blocks session restore after restart', () async {
+    final store = _FakeTokenStore()
+      ..refreshToken = 'retained-refresh'
+      ..cleanupPending = true;
+    final authApi = _FakeAuthApi();
+    final restartedController = AuthController(
+      authApi: authApi,
+      tokenStore: store,
+    );
+    addTearDown(() {
+      restartedController.dispose();
+      store.expirations.close();
+    });
+
+    await pumpEventQueue();
+
+    expect(restartedController.state.status, AuthStatus.cleanupRequired);
+    expect(authApi.refreshAttempted, isFalse);
+    expect(store.refreshToken, 'retained-refresh');
+  });
+
+  test('failed tombstone removal keeps session locked', () async {
+    final store = _FakeTokenStore()
+      ..refreshToken = 'stored-refresh'
+      ..clearCleanupError = Exception('synthetic preference write failure');
+    final controller = AuthController(
+      authApi: _FakeAuthApi(),
+      tokenStore: store,
+    );
+    addTearDown(() {
+      controller.dispose();
+      store.expirations.close();
+    });
+    await pumpEventQueue();
+
+    final result = await controller.logout();
+
+    expect(result, isFalse);
+    expect(controller.state.status, AuthStatus.cleanupRequired);
+  });
+
+  test('direct account replacement requires logout first', () async {
+    final store = _FakeTokenStore();
+    final authApi = _FakeAuthApi();
+    final controller = AuthController(authApi: authApi, tokenStore: store);
+    addTearDown(() {
+      controller.dispose();
+      store.expirations.close();
+    });
+    await controller.login(email: 'user-a@example.test', password: 'password');
+    authApi.userId = 'synthetic-user-b';
+
+    final result = await controller.login(
+      email: 'user-b@example.test',
+      password: 'password',
+    );
+
+    expect(result, isFalse);
+    expect(controller.state.userId, 'synthetic-user-a');
+  });
+
   test('session expiration clears previous account member scope', () async {
     final tokenStore = _FakeTokenStore();
     final memberStore = _FakeMemberPreferenceStore();
@@ -153,12 +420,94 @@ void main() {
         .read(authProvider.notifier)
         .login(email: 'synthetic@example.test', password: 'password');
     container.read(activeMemberProvider.notifier).state = 'member-user-a';
-    await memberStore.writeActiveMemberId('member-user-a');
+    await memberStore.writeActiveMemberId(
+      userId: 'synthetic-user-a',
+      memberId: 'member-user-a',
+    );
 
     await tokenStore.expireSession();
     await pumpEventQueue();
 
     expect(container.read(activeMemberProvider), isNull);
-    expect(await memberStore.readActiveMemberId(), isNull);
+    expect(
+      await memberStore.readActiveMemberId(userId: 'synthetic-user-a'),
+      isNull,
+    );
   });
+
+  test('member preference cleanup failure does not escape lifecycle', () async {
+    final tokenStore = _FakeTokenStore();
+    final memberStore = _FakeMemberPreferenceStore()
+      ..clearError = PlatformException(
+        code: '-34018',
+        message: 'A required entitlement isn\'t present.',
+      );
+    final container = ProviderContainer(
+      overrides: [
+        tokenStoreProvider.overrideWithValue(tokenStore),
+        authApiProvider.overrideWithValue(_FakeAuthApi()),
+        memberPreferenceStoreProvider.overrideWithValue(memberStore),
+      ],
+    );
+    addTearDown(() {
+      container.dispose();
+      tokenStore.expirations.close();
+    });
+
+    container.read(authLifecycleProvider);
+    await container
+        .read(authProvider.notifier)
+        .login(email: 'synthetic@example.test', password: 'password');
+    await tokenStore.expireSession();
+    await pumpEventQueue();
+
+    expect(memberStore.clearAttempted, isTrue);
+    expect(container.read(authProvider).status, AuthStatus.unauthenticated);
+  });
+
+  test(
+    'failed account cleanup cannot restore member into next account',
+    () async {
+      final tokenStore = _FakeTokenStore();
+      final authApi = _FakeAuthApi();
+      final memberStore = _FakeMemberPreferenceStore();
+      final container = ProviderContainer(
+        overrides: [
+          tokenStoreProvider.overrideWithValue(tokenStore),
+          authApiProvider.overrideWithValue(authApi),
+          memberPreferenceStoreProvider.overrideWithValue(memberStore),
+        ],
+      );
+      addTearDown(() {
+        container.dispose();
+        tokenStore.expirations.close();
+      });
+      container.read(authLifecycleProvider);
+      await container
+          .read(authProvider.notifier)
+          .login(email: 'user-a@example.test', password: 'password');
+      await memberStore.writeActiveMemberId(
+        userId: 'synthetic-user-a',
+        memberId: 'member-user-a',
+      );
+      memberStore.clearError = PlatformException(
+        code: '-34018',
+        message: 'A required entitlement isn\'t present.',
+      );
+
+      await tokenStore.expireSession();
+      await pumpEventQueue();
+      authApi.userId = 'synthetic-user-b';
+      await container
+          .read(authProvider.notifier)
+          .login(email: 'user-b@example.test', password: 'password');
+
+      expect(container.read(authProvider).userId, 'synthetic-user-b');
+      expect(
+        await memberStore.readActiveMemberId(userId: 'synthetic-user-b'),
+        isNull,
+      );
+      expect(container.read(activeMemberProvider), isNull);
+    },
+  );
 }

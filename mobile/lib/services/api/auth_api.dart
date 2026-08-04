@@ -3,8 +3,13 @@ import 'package:dio/dio.dart';
 import 'package:family_veda/services/api/api_client.dart';
 
 class AuthTokens {
-  const AuthTokens({required this.accessToken, required this.refreshToken});
+  const AuthTokens({
+    required this.userId,
+    required this.accessToken,
+    required this.refreshToken,
+  });
 
+  final String userId;
   final String accessToken;
   final String refreshToken;
 }
@@ -32,6 +37,7 @@ class DioAuthApi implements AuthApi {
     final data = response.data;
     if (data == null) throw const FormatException('Empty login response');
     return AuthTokens(
+      userId: data['userId'] as String,
       accessToken: data['accessToken'] as String,
       refreshToken: data['refreshToken'] as String,
     );
@@ -46,6 +52,7 @@ class DioAuthApi implements AuthApi {
     final data = response.data;
     if (data == null) throw const FormatException('Empty refresh response');
     return AuthTokens(
+      userId: data['userId'] as String,
       accessToken: data['accessToken'] as String,
       refreshToken: data['refreshToken'] as String,
     );

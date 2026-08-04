@@ -1,10 +1,47 @@
+import 'dart:io';
+
+import 'package:family_veda/services/storage/logout_cleanup_marker_store.dart';
 import 'package:family_veda/services/storage/member_preference_store.dart';
 import 'package:family_veda/services/storage/secure_token_store.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class _MemoryCleanupMarkerStore implements LogoutCleanupMarkerStore {
+  bool pending = false;
+
+  @override
+  Future<void> clear() async => pending = false;
+
+  @override
+  Future<bool> isPending() async => pending;
+
+  @override
+  Future<void> markPending() async => pending = true;
+}
+
+class _FailingDeleteStorage extends FlutterSecureStorage {
+  const _FailingDeleteStorage();
+
+  @override
+  Future<void> delete({
+    required String key,
+    AppleOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    AppleOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) => throw PlatformException(
+    code: '-34018',
+    message: 'A required entitlement isn\'t present.',
+  );
+}
+
 void main() {
-  setUp(() => FlutterSecureStorage.setMockInitialValues({}));
+  setUp(() {
+    FlutterSecureStorage.setMockInitialValues({});
+  });
 
   test(
     'access token stays in memory while refresh token persists securely',
@@ -22,17 +59,43 @@ void main() {
     },
   );
 
-  test('active member preference can be written and cleared', () async {
-    final store = SecureMemberPreferenceStore();
-    await store.writeActiveMemberId('member-1');
-    expect(await store.readActiveMemberId(), 'member-1');
+  test(
+    'active member preference is isolated and cleared per account',
+    () async {
+      final store = SecureMemberPreferenceStore();
+      await store.writeActiveMemberId(
+        userId: 'synthetic-user-a',
+        memberId: 'member-a',
+      );
+      await store.writeActiveMemberId(
+        userId: 'synthetic-user-b',
+        memberId: 'member-b',
+      );
+      expect(
+        await store.readActiveMemberId(userId: 'synthetic-user-a'),
+        'member-a',
+      );
+      expect(
+        await store.readActiveMemberId(userId: 'synthetic-user-b'),
+        'member-b',
+      );
 
-    await store.clearActiveMemberId();
-    expect(await store.readActiveMemberId(), isNull);
-  });
+      await store.clearActiveMemberId(userId: 'synthetic-user-a');
+      expect(
+        await store.readActiveMemberId(userId: 'synthetic-user-a'),
+        isNull,
+      );
+      expect(
+        await store.readActiveMemberId(userId: 'synthetic-user-b'),
+        'member-b',
+      );
+    },
+  );
 
   test('expiring a session clears tokens and emits event', () async {
-    final store = SecureTokenStore();
+    final store = SecureTokenStore(
+      cleanupMarkerStore: _MemoryCleanupMarkerStore(),
+    );
     await store.writeTokens(
       accessToken: 'memory-access',
       refreshToken: 'secure-refresh',
@@ -44,5 +107,64 @@ void main() {
     await expiration;
     expect(await store.readAccessToken(), isNull);
     expect(await store.readRefreshToken(), isNull);
+  });
+
+  test('Keychain delete failure still emits session expiration', () async {
+    final marker = _MemoryCleanupMarkerStore();
+    final store = SecureTokenStore(
+      storage: const _FailingDeleteStorage(),
+      cleanupMarkerStore: marker,
+    );
+    await store.writeTokens(
+      accessToken: 'memory-access',
+      refreshToken: 'secure-refresh',
+    );
+    final expiration = expectLater(store.sessionExpirations, emits(null));
+
+    await expectLater(store.expireSession(), completes);
+
+    await expiration;
+    expect(await store.readAccessToken(), isNull);
+    expect(await store.isCleanupPending(), isTrue);
+  });
+
+  test('logout cleanup marker persists independently across stores', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'family_veda_logout_marker_',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+    final first = FileLogoutCleanupMarkerStore(
+      directoryProvider: () async => directory,
+    );
+    await first.markPending();
+
+    final restarted = FileLogoutCleanupMarkerStore(
+      directoryProvider: () async => directory,
+    );
+
+    expect(await restarted.isPending(), isTrue);
+    expect(directory.listSync(), hasLength(1));
+    await restarted.clear();
+    expect(await first.isPending(), isFalse);
+  });
+
+  test('interrupted marker write remains pending after restart', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'family_veda_interrupted_marker_',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+    final temporary = File(
+      '${directory.path}/.family_veda_logout_cleanup_pending.999.tmp',
+    );
+    await temporary.writeAsBytes(const [1], flush: true);
+
+    final restarted = FileLogoutCleanupMarkerStore(
+      directoryProvider: () async => directory,
+    );
+
+    expect(await restarted.isPending(), isTrue);
+    await restarted.clear();
+    expect(await temporary.exists(), isFalse);
+    expect(await restarted.isPending(), isFalse);
   });
 }

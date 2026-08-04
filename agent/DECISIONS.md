@@ -228,6 +228,20 @@ Working decision log. Formal, report-grade ADRs live in `docs/adr/` (ADR-001 …
 
 ---
 
+## 2026-08-04 — Account-scope mobile member state and make logout truthful
+
+**Decision:** key persisted active-member preferences by authenticated backend user ID and revalidate identity after every asynchronous restore. Persist a non-secret logout-intent marker independently of Keychain using a flushed temporary file, atomic rename, parent-directory `fsync`, and stale-temp recovery in application-support storage. Treat logout as durable only when server revocation or local refresh-token deletion succeeds; if both fail, enter a locked cleanup-required state that survives restart.
+
+**Reason:** an unscoped or late Keychain read can cross account boundaries. Claiming sign-out after both revocation and deletion fail leaves a valid refresh token able to restore silently.
+
+**Alternatives considered:** swallow storage errors and always show signed out (rejected: false security state) · use only an in-memory cleanup lock (rejected: restart could restore the retained refresh token) · remove member persistence entirely (rejected: unnecessary usability regression).
+
+**Consequences:** secure-storage failures never expose the prior account's member selection; 401 events always close in-memory auth. A combined logout failure blocks protected routes, clears member scope and prevents refresh or new login until cleanup succeeds, including after process restart. Mobile uses `path_provider` only to locate app-support storage; tokens remain in Keychain.
+
+**Status:** Accepted under the approved design-correction authority.
+
+---
+
 ## Open decisions
 
 | # | Question | Owner | Decide by |

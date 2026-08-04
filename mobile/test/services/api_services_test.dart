@@ -14,6 +14,7 @@ class _FakeTokenStore implements TokenStore {
   final expirations = StreamController<void>.broadcast();
   String? accessToken = 'access-token';
   String? refreshToken = 'refresh-token';
+  bool cleanupPending = false;
 
   @override
   Future<void> clear() async {
@@ -22,10 +23,21 @@ class _FakeTokenStore implements TokenStore {
   }
 
   @override
+  Future<void> clearCleanupPending() async => cleanupPending = false;
+
+  @override
   Future<void> expireSession() async {
+    cleanupPending = true;
     await clear();
+    cleanupPending = false;
     expirations.add(null);
   }
+
+  @override
+  Future<bool> isCleanupPending() async => cleanupPending;
+
+  @override
+  Future<void> markCleanupPending() async => cleanupPending = true;
 
   @override
   Future<String?> readAccessToken() async => accessToken;
@@ -60,8 +72,13 @@ class _JsonAdapter implements HttpClientAdapter {
     final (status, body) = switch (path) {
       '/api/v1/auth/login' || '/api/v1/auth/refresh' => (
         200,
-        {'accessToken': 'new-access', 'refreshToken': 'new-refresh'},
+        {
+          'userId': 'synthetic-user',
+          'accessToken': 'new-access',
+          'refreshToken': 'new-refresh',
+        },
       ),
+      '/api/v1/auth/logout' => (204, const <String, dynamic>{}),
       '/api/v1/members/member-1/records' => (
         200,
         {
@@ -79,13 +96,15 @@ class _JsonAdapter implements HttpClientAdapter {
       '/api/v1/members/member-1/vitals' => (201, {'id': 'vital-1'}),
       '/api/v1/families/me' => (
         200,
-        {'members': [
-          {
-            'id': 'member-1',
-            'displayName': 'Synthetic Member',
-            'relationshipLabel': 'Self',
-          },
-        ]},
+        {
+          'members': [
+            {
+              'id': 'member-1',
+              'displayName': 'Synthetic Member',
+              'relationshipLabel': 'Self',
+            },
+          ],
+        },
       ),
       '/api/v1/members/member-1/triage-cases' => (
         200,
@@ -122,11 +141,21 @@ class _JsonAdapter implements HttpClientAdapter {
       ),
       '/api/v1/triage-cases/case-1/status' => (
         200,
-        {'id': 'case-1', 'status': 'FAILED_SAFE', 'priority': 'ROUTINE', 'failureCode': 'AGENT_UNAVAILABLE'},
+        {
+          'id': 'case-1',
+          'status': 'FAILED_SAFE',
+          'priority': 'ROUTINE',
+          'failureCode': 'AGENT_UNAVAILABLE',
+        },
       ),
       '/api/v1/members/member-1/familial-risk' => (
         200,
-        {'caseId': 'case-1', 'screeningGuidance': 'Please discuss appropriate screening with a licensed clinician.', 'disclaimer': 'Synthetic disclaimer'},
+        {
+          'caseId': 'case-1',
+          'screeningGuidance':
+              'Please discuss appropriate screening with a licensed clinician.',
+          'disclaimer': 'Synthetic disclaimer',
+        },
       ),
       '/api/v1/members/member-1/episodes' => (201, {'id': 'episode-1'}),
       '/api/v1/episodes/episode-1/triage' => (202, {'id': 'case-2'}),
@@ -170,11 +199,36 @@ void main() {
     final refresh = await api.refresh('refresh-token');
 
     expect(login.accessToken, 'new-access');
+    expect(login.userId, 'synthetic-user');
     expect(refresh.refreshToken, 'new-refresh');
     expect(
       adapter.lastRequest?.headers['Authorization'],
       'Bearer access-token',
     );
+  });
+
+  test('auth API sends logout request', () async {
+    await DioAuthApi(client).logout();
+
+    expect(adapter.lastRequest?.uri.path, '/api/v1/auth/logout');
+  });
+
+  test('auth errors map to safe user-facing messages', () {
+    DioException errorFor(int status) => DioException(
+      requestOptions: RequestOptions(path: '/auth/login'),
+      response: Response<void>(
+        requestOptions: RequestOptions(path: '/auth/login'),
+        statusCode: status,
+      ),
+    );
+
+    expect(userFacingApiError(errorFor(401)), contains('incorrect'));
+    expect(userFacingApiError(errorFor(403)), contains('cannot access'));
+    expect(
+      userFacingApiError(errorFor(500)),
+      contains('temporarily unavailable'),
+    );
+    expect(userFacingApiError(Exception('synthetic')), contains('connection'));
   });
 
   test('record API scopes request to member and parses records', () async {
@@ -183,8 +237,19 @@ void main() {
 
     expect(records.single.memberId, 'member-1');
     expect(adapter.lastRequest?.uri.path, '/api/v1/members/member-1/records');
-    await api.addRecord(memberId: 'member-1', recordType: 'Note', title: 'Synthetic note', occurredOn: DateTime.utc(2026, 8, 4));
-    await api.addVital(memberId: 'member-1', vitalType: 'Synthetic vital', value: 1, unit: 'unit', measuredAt: DateTime.utc(2026, 8, 4));
+    await api.addRecord(
+      memberId: 'member-1',
+      recordType: 'Note',
+      title: 'Synthetic note',
+      occurredOn: DateTime.utc(2026, 8, 4),
+    );
+    await api.addVital(
+      memberId: 'member-1',
+      vitalType: 'Synthetic vital',
+      value: 1,
+      unit: 'unit',
+      measuredAt: DateTime.utc(2026, 8, 4),
+    );
     expect(adapter.lastRequest?.uri.path, '/api/v1/members/member-1/vitals');
   });
 
@@ -196,7 +261,10 @@ void main() {
 
     expect((await api.getMembers()).single.id, 'member-1');
     expect((await api.getCases('member-1')).single.id, 'case-1');
-    expect((await api.getCaseStatus('case-1'))['failureCode'], 'AGENT_UNAVAILABLE');
+    expect(
+      (await api.getCaseStatus('case-1'))['failureCode'],
+      'AGENT_UNAVAILABLE',
+    );
     expect((await api.getNotifications()).single.caseStatus, 'APPROVED');
     final guidance = await api.getApprovedGuidance(
       caseId: 'case-1',
@@ -204,7 +272,10 @@ void main() {
     );
     expect(guidance?.finalAdvisory, 'Doctor-approved guidance.');
     expect(adapter.lastRequest?.queryParameters['memberId'], 'member-1');
-    expect((await api.getApprovedFamilialRisk('member-1'))?.screeningGuidance, contains('licensed clinician'));
+    expect(
+      (await api.getApprovedFamilialRisk('member-1'))?.screeningGuidance,
+      contains('licensed clinician'),
+    );
     final caseId = await api.submitComplaint(
       memberId: 'member-1',
       chiefComplaint: 'Synthetic complaint',

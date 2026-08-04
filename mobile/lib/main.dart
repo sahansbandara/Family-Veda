@@ -21,16 +21,25 @@ class FamilyVedaApp extends ConsumerStatefulWidget {
 }
 
 class _FamilyVedaAppState extends ConsumerState<FamilyVedaApp> {
-  bool _memberRestored = false;
+  String? _memberRestoredForUserId;
 
-  Future<void> _restoreActiveMember() async {
-    if (_memberRestored) return;
-    _memberRestored = true;
-    final memberId = await ref
-        .read(memberPreferenceStoreProvider)
-        .readActiveMemberId();
-    if (mounted && memberId != null) {
-      ref.read(activeMemberProvider.notifier).state = memberId;
+  Future<void> _restoreActiveMember(String userId) async {
+    if (_memberRestoredForUserId == userId) return;
+    _memberRestoredForUserId = userId;
+    try {
+      final memberId = await ref
+          .read(memberPreferenceStoreProvider)
+          .readActiveMemberId(userId: userId);
+      if (!mounted || _memberRestoredForUserId != userId) return;
+      final auth = ref.read(authProvider);
+      if (auth.status != AuthStatus.authenticated || auth.userId != userId) {
+        return;
+      }
+      if (memberId != null) {
+        ref.read(activeMemberProvider.notifier).state = memberId;
+      }
+    } on Object {
+      // Member selection stays empty when secure storage is unavailable.
     }
   }
 
@@ -39,8 +48,13 @@ class _FamilyVedaAppState extends ConsumerState<FamilyVedaApp> {
     ref.watch(authLifecycleProvider);
     ref.watch(pushRegistrationProvider);
     ref.listen<AuthState>(authProvider, (_, next) {
-      if (next.status == AuthStatus.authenticated) _restoreActiveMember();
-      if (next.status == AuthStatus.unauthenticated) _memberRestored = false;
+      if (next.status == AuthStatus.authenticated && next.userId != null) {
+        _restoreActiveMember(next.userId!);
+      }
+      if (next.status == AuthStatus.unauthenticated ||
+          next.status == AuthStatus.cleanupRequired) {
+        _memberRestoredForUserId = null;
+      }
     });
     final router = ref.watch(appRouterProvider);
     return MaterialApp.router(

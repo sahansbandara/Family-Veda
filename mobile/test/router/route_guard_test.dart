@@ -14,10 +14,21 @@ void main() {
     );
   });
 
+  test('cleanup-required session cannot access protected route', () {
+    expect(
+      routeRedirect(
+        auth: const AuthState.cleanupRequired(userId: 'synthetic-user'),
+        activeMemberId: 'member-1',
+        location: '/records',
+      ),
+      '/login',
+    );
+  });
+
   test('member-scoped route requires an active member', () {
     expect(
       routeRedirect(
-        auth: const AuthState.authenticated(),
+        auth: const AuthState.authenticated(userId: 'synthetic-user'),
         activeMemberId: null,
         location: '/guidance/case-1',
       ),
@@ -28,7 +39,7 @@ void main() {
   test('authenticated user with active member may access records', () {
     expect(
       routeRedirect(
-        auth: const AuthState.authenticated(),
+        auth: const AuthState.authenticated(userId: 'synthetic-user'),
         activeMemberId: 'member-1',
         location: '/records',
       ),

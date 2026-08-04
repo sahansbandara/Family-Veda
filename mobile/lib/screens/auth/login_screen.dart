@@ -35,10 +35,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (success && mounted) context.go('/home');
   }
 
+  Future<void> _retrySignOut() async {
+    await ref.read(authProvider.notifier).logout();
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
     final loading = auth.status == AuthStatus.loading;
+    final cleanupRequired = auth.status == AuthStatus.cleanupRequired;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -69,6 +74,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
+                      enabled: !cleanupRequired,
                       decoration: const InputDecoration(labelText: 'Email'),
                       validator: (value) {
                         final email = value?.trim() ?? '';
@@ -83,6 +89,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       controller: _passwordController,
                       obscureText: true,
                       autofillHints: const [AutofillHints.password],
+                      enabled: !cleanupRequired,
                       decoration: const InputDecoration(labelText: 'Password'),
                       validator: (value) => (value?.length ?? 0) < 8
                           ? 'Password must be at least 8 characters'
@@ -100,13 +107,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 20),
                     ElevatedButton(
                       key: const Key('login_button'),
-                      onPressed: loading ? null : _submit,
+                      onPressed: loading
+                          ? null
+                          : cleanupRequired
+                          ? _retrySignOut
+                          : _submit,
                       child: loading
                           ? const SizedBox.square(
                               dimension: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Sign in'),
+                          : Text(
+                              cleanupRequired ? 'Retry sign out' : 'Sign in',
+                            ),
                     ),
                   ],
                 ),

@@ -33,10 +33,11 @@ Status reconciled against the repository on 2026-08-04. This file separates impl
 - [x] PostgreSQL integration tests: 5 passing
 - [x] EF pending-model check: clean
 - [x] React lint/build/tests: 17 passing
-- [x] Flutter analyze/tests: 27 passing
+- [x] Flutter analyze/tests: 46 passing; touched auth/storage service coverage 93%+
 - [x] Docker build and PostgreSQL-backed runtime health/Swagger/Tesseract checks
 - [ ] 80% service-layer coverage — current coverage tooling hangs under the local .NET 10 SDK and React aggregate coverage is below target; expand tests and rerun under CI/.NET 8
-- [ ] Android APK/device verification — Android SDK and physical device unavailable locally
+- [x] Android SDK/API 36, debug APK, emulator install and login-screen launch verified locally
+- [ ] Physical Android device verification — device still required for assignment evidence
 - [ ] Physical iPhone verification — connect the iPhone, select an Apple signing team and add the local Firebase iOS configuration
 - [ ] Live Ollama workflow/latency — Ollama/model unavailable locally
 - [ ] Live FCM push/device deep-link — Firebase configuration and device unavailable

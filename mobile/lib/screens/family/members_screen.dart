@@ -1,5 +1,6 @@
 // [S1] Identity, Family & Consent.
 import 'package:family_veda/providers/active_member_provider.dart';
+import 'package:family_veda/providers/auth_provider.dart';
 import 'package:family_veda/providers/core_providers.dart';
 import 'package:family_veda/providers/members_provider.dart';
 import 'package:family_veda/widgets/shared/async_state_views.dart';
@@ -37,10 +38,26 @@ class MembersScreen extends ConsumerWidget {
                   member: member,
                   isActive: member.id == activeId,
                   onSelected: () async {
+                    final userId = ref.read(authProvider).userId;
+                    if (userId == null) return;
                     ref.read(activeMemberProvider.notifier).state = member.id;
-                    await ref
-                        .read(memberPreferenceStoreProvider)
-                        .writeActiveMemberId(member.id);
+                    try {
+                      await ref
+                          .read(memberPreferenceStoreProvider)
+                          .writeActiveMemberId(
+                            userId: userId,
+                            memberId: member.id,
+                          );
+                    } on Object {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Member selected for this session, but the preference could not be saved.',
+                          ),
+                        ),
+                      );
+                    }
                   },
                 );
               },

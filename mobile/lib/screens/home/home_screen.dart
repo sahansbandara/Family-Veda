@@ -29,7 +29,18 @@ class HomeScreen extends ConsumerWidget {
           ),
           IconButton(
             tooltip: 'Sign out',
-            onPressed: () => logoutAndClearMember(ref),
+            onPressed: () async {
+              final signedOut = await logoutAndClearMember(ref);
+              if (!signedOut && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Sign out could not be completed. Check your connection and try again.',
+                    ),
+                  ),
+                );
+              }
+            },
             icon: const Icon(Icons.logout),
           ),
         ],
@@ -60,8 +71,18 @@ class HomeScreen extends ConsumerWidget {
               enabled: activeId != null,
               onTap: () => context.push('/records'),
             ),
-            _HomeAction(icon: Icons.note_add_outlined, title: 'Add health record', enabled: activeId != null, onTap: () => context.push('/records/new')),
-            _HomeAction(icon: Icons.monitor_heart_outlined, title: 'Record vital', enabled: activeId != null, onTap: () => context.push('/vitals/new')),
+            _HomeAction(
+              icon: Icons.note_add_outlined,
+              title: 'Add health record',
+              enabled: activeId != null,
+              onTap: () => context.push('/records/new'),
+            ),
+            _HomeAction(
+              icon: Icons.monitor_heart_outlined,
+              title: 'Record vital',
+              enabled: activeId != null,
+              onTap: () => context.push('/vitals/new'),
+            ),
             _HomeAction(
               icon: Icons.add_comment_outlined,
               title: 'Submit a complaint',

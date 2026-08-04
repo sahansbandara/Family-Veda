@@ -4,20 +4,30 @@ import 'dart:async';
 import 'package:family_veda/providers/active_member_provider.dart';
 import 'package:family_veda/providers/core_providers.dart';
 import 'package:family_veda/services/api/auth_api.dart';
+import 'package:family_veda/services/storage/member_preference_store.dart';
 import 'package:family_veda/services/storage/secure_token_store.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum AuthStatus { loading, authenticated, unauthenticated }
+enum AuthStatus { loading, authenticated, unauthenticated, cleanupRequired }
 
 class AuthState {
-  const AuthState({required this.status, this.errorMessage});
+  const AuthState({required this.status, this.userId, this.errorMessage});
 
   const AuthState.loading() : this(status: AuthStatus.loading);
-  const AuthState.authenticated() : this(status: AuthStatus.authenticated);
+  const AuthState.authenticated({required String userId})
+    : this(status: AuthStatus.authenticated, userId: userId);
   const AuthState.unauthenticated({String? errorMessage})
     : this(status: AuthStatus.unauthenticated, errorMessage: errorMessage);
+  const AuthState.cleanupRequired({String? userId})
+    : this(
+        status: AuthStatus.cleanupRequired,
+        userId: userId,
+        errorMessage:
+            'Sign out cleanup is incomplete. Retry before signing in again.',
+      );
 
   final AuthStatus status;
+  final String? userId;
   final String? errorMessage;
 }
 
@@ -38,8 +48,22 @@ class AuthController extends StateNotifier<AuthState> {
   final TokenStore _tokenStore;
   late final StreamSubscription<void> _expirationSubscription;
 
+  Future<bool> _clearTokensBestEffort() async {
+    try {
+      await _tokenStore.clear();
+      return true;
+    } on Object {
+      // Auth must still fail closed when secure storage is unavailable.
+      return false;
+    }
+  }
+
   Future<void> _restoreSession() async {
     try {
+      if (await _tokenStore.isCleanupPending()) {
+        state = const AuthState.cleanupRequired();
+        return;
+      }
       final refreshToken = await _tokenStore.readRefreshToken();
       if (refreshToken == null || refreshToken.isEmpty) {
         state = const AuthState.unauthenticated();
@@ -50,18 +74,27 @@ class AuthController extends StateNotifier<AuthState> {
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
       );
-      state = const AuthState.authenticated();
+      state = AuthState.authenticated(userId: tokens.userId);
     } on Object {
-      try {
-        await _tokenStore.clear();
-      } on Object {
-        // A keychain failure must not leave startup blocked in loading state.
-      }
+      await _clearTokensBestEffort();
       state = const AuthState.unauthenticated();
     }
   }
 
   Future<bool> login({required String email, required String password}) async {
+    if (state.status == AuthStatus.authenticated ||
+        state.status == AuthStatus.cleanupRequired) {
+      return false;
+    }
+    try {
+      if (await _tokenStore.isCleanupPending()) {
+        state = const AuthState.cleanupRequired();
+        return false;
+      }
+    } on Object {
+      state = const AuthState.cleanupRequired();
+      return false;
+    }
     state = const AuthState.loading();
     try {
       final tokens = await _authApi.login(email: email, password: password);
@@ -69,9 +102,10 @@ class AuthController extends StateNotifier<AuthState> {
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
       );
-      state = const AuthState.authenticated();
+      state = AuthState.authenticated(userId: tokens.userId);
       return true;
     } on Object catch (error) {
+      await _clearTokensBestEffort();
       state = AuthState.unauthenticated(
         errorMessage: userFacingApiError(error),
       );
@@ -79,14 +113,36 @@ class AuthController extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> logout() async {
+  Future<bool> logout() async {
+    final authenticatedState = state;
+    try {
+      await _tokenStore.markCleanupPending();
+    } on Object {
+      // Continue: server revocation or token deletion can still prove sign-out.
+    }
+    var serverRevoked = false;
     try {
       await _authApi.logout();
+      serverRevoked = true;
     } on Object {
       // Local credentials must still be removed when server revocation is unavailable.
-    } finally {
-      await _tokenStore.clear();
+    }
+    final localCleared = await _clearTokensBestEffort();
+    if (serverRevoked || localCleared) {
+      try {
+        await _tokenStore.clearCleanupPending();
+      } on Object {
+        state = AuthState.cleanupRequired(userId: authenticatedState.userId);
+        return false;
+      }
       state = const AuthState.unauthenticated();
+      return true;
+    } else {
+      final userId = authenticatedState.userId;
+      state = userId == null
+          ? const AuthState.cleanupRequired()
+          : AuthState.cleanupRequired(userId: userId);
+      return false;
     }
   }
 
@@ -104,14 +160,34 @@ final authProvider = StateNotifierProvider<AuthController, AuthState>((ref) {
   );
 });
 
+Future<void> _clearActiveMemberPreference(
+  MemberPreferenceStore store,
+  String userId,
+) async {
+  try {
+    await store.clearActiveMemberId(userId: userId);
+  } on Object {
+    // Auth state is already closed; unavailable secure storage must not escape.
+  }
+}
+
 final authLifecycleProvider = Provider<void>((ref) {
   ref.listen<AuthState>(authProvider, (previous, next) {
-    if (next.status != AuthStatus.unauthenticated) return;
+    if (next.status != AuthStatus.unauthenticated &&
+        next.status != AuthStatus.cleanupRequired) {
+      return;
+    }
     ref.read(activeMemberProvider.notifier).state = null;
-    unawaited(ref.read(memberPreferenceStoreProvider).clearActiveMemberId());
+    final previousUserId = previous?.userId ?? next.userId;
+    if (previousUserId == null) return;
+    unawaited(
+      _clearActiveMemberPreference(
+        ref.read(memberPreferenceStoreProvider),
+        previousUserId,
+      ),
+    );
   }, fireImmediately: true);
 });
 
-Future<void> logoutAndClearMember(WidgetRef ref) async {
-  await ref.read(authProvider.notifier).logout();
-}
+Future<bool> logoutAndClearMember(WidgetRef ref) =>
+    ref.read(authProvider.notifier).logout();
