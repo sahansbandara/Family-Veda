@@ -21,6 +21,7 @@ Status reconciled against the repository on 2026-08-04. This file separates impl
 - [x] Adult/minor notification privacy, active-grant doctor notification and notification-token protection
 - [x] React family/doctor/admin workspace with public registration, onboarding, records/vitals/lab review, relationships/consent, queues, approvals and audit
 - [x] Flutter patient app with secure auth, member switching, records, record/vital entry, lab upload, complaint submission, case tracking, emergency, notifications and approved-only guidance
+- [x] Flutter iOS scaffold with camera/photo permissions, iOS 15 minimum, push capability, CocoaPods lock and correct `IOS` device-token registration
 - [x] Render/Neon/Vercel manifests, Docker image, CI workflow and exported OpenAPI
 - [x] Synthetic family-of-four seed; disabled by default
 - [x] Backend unit/integration, React and Flutter test suites
@@ -32,18 +33,22 @@ Status reconciled against the repository on 2026-08-04. This file separates impl
 - [x] PostgreSQL integration tests: 5 passing
 - [x] EF pending-model check: clean
 - [x] React lint/build/tests: 17 passing
-- [x] Flutter analyze/tests: 25 passing
+- [x] Flutter analyze/tests: 27 passing
 - [x] Docker build and PostgreSQL-backed runtime health/Swagger/Tesseract checks
 - [ ] 80% service-layer coverage — current coverage tooling hangs under the local .NET 10 SDK and React aggregate coverage is below target; expand tests and rerun under CI/.NET 8
 - [ ] Android APK/device verification — Android SDK and physical device unavailable locally
+- [ ] Physical iPhone verification — connect the iPhone, select an Apple signing team and add the local Firebase iOS configuration
 - [ ] Live Ollama workflow/latency — Ollama/model unavailable locally
 - [ ] Live FCM push/device deep-link — Firebase configuration and device unavailable
 
-## Deployment blockers
+## Deployment state and blockers
 
-- [ ] Authenticate Neon and create production PostgreSQL database
-- [ ] Authenticate Render; current CLI token is expired
-- [ ] Authenticate Vercel; current CLI token is invalid
+- [x] Neon CLI authenticated; organization `Sahan` and project `SLIIT Project` are accessible
+- [x] Render CLI authenticated; workspace `SLIIT` is selected
+- [x] Vercel CLI authenticated; team `Sithmi` is accessible
+- [ ] Provision PostgreSQL 16 for production — existing Neon project is PostgreSQL 18, while the verified project target is 16
+- [ ] Add payment information to Render workspace — blueprint validation returns `need_payment_info`
+- [ ] Create the Family Veda Render service and Vercel project
 - [ ] Configure production database URL, JWT key, frontend origin/API URL, persistent storage and Data Protection path in provider dashboards
 - [ ] Provide a reachable user-controlled Ollama endpoint; hosted LLM APIs are prohibited by ADR-006
 - [ ] Configure Firebase service account/project if push delivery is required

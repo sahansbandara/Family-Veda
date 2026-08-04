@@ -200,6 +200,20 @@ Working decision log. Formal, report-grade ADRs live in `docs/adr/` (ADR-001 …
 
 **Status:** Accepted with documented applicability assessment.
 
+## 2026-08-04 — Add iOS as a supported development target
+
+**Decision:** add an iOS 15+ Flutter target with bundle identifier `lk.familyveda.familyveda`, CocoaPods integration, required camera/photo permissions, APNs capability and platform-correct notification subscription.
+
+**Reason:** the available physical development device is an iPhone, while the repository previously contained only Android platform files. Shared Dart application code remains unchanged across both targets.
+
+**Alternatives considered:** install only the Android SDK and use an emulator (rejected as it does not exercise the available physical device) · replace Android with iOS (rejected because the assignment still requires a signed APK tested on a physical Android device) · defer iOS until deployment (rejected because platform-specific notification registration was already incorrectly hardcoded to `ANDROID`).
+
+**Consequences:** iPhone development requires Apple signing and a gitignored Firebase iOS configuration. Android remains supported and still must satisfy the assessed APK/device gate.
+
+**Status:** Accepted with explicit user approval.
+
+---
+
 ## Open decisions
 
 | # | Question | Owner | Decide by |

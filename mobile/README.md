@@ -103,6 +103,27 @@ flutter build apk --release
 
 > `10.0.2.2` is the Android emulator's alias for the host machine's localhost. On a physical device, use the machine's LAN IP or the deployed URL.
 
+## Run on an iPhone
+
+Requirements: macOS, Xcode, CocoaPods, an Apple ID added to Xcode, and an iPhone with Developer Mode enabled. Keep the repository outside iCloud/File Provider folders so Xcode CodeSign does not inherit unsupported extended attributes; `~/Developer/Family-Veda` is a suitable location.
+
+```bash
+cd mobile
+flutter pub get
+open ios/Runner.xcworkspace
+```
+
+In Xcode, select `Runner`, open **Signing & Capabilities**, select your Apple development team, and keep the bundle identifier `lk.familyveda.familyveda`. Connect and trust the iPhone, then run:
+
+```bash
+flutter devices
+flutter run -d <iphone-device-id> \
+  --dart-define=API_BASE_URL=https://<deployed-api-host>/api/v1 \
+  --dart-define=APP_ENV=development
+```
+
+For a local backend, use a trusted HTTPS development endpoint or tunnel; do not disable certificate validation. Push notifications additionally require a Firebase iOS app with the same bundle identifier, `GoogleService-Info.plist` added locally to the Runner target, and the Push Notifications capability enabled in Xcode. The Firebase file is intentionally gitignored.
+
 ## References
 
 `design.md` · `docs/API_CONTRACT.md` · `docs/CLINICAL_SAFETY.md` · `rules/flutter/` · `rules/frontend.md`

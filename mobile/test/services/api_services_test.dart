@@ -109,6 +109,7 @@ class _JsonAdapter implements HttpClientAdapter {
           },
         ],
       ),
+      '/api/v1/notifications/subscribe' => (204, const <String, dynamic>{}),
       '/api/v1/triage-cases/case-1/approved-guidance' => (
         200,
         {
@@ -188,7 +189,10 @@ void main() {
   });
 
   test('patient API parses patient-safe endpoints', () async {
-    final api = DioPatientApi(client);
+    final api = DioPatientApi(
+      client,
+      devicePlatform: MobileDevicePlatform.android,
+    );
 
     expect((await api.getMembers()).single.id, 'member-1');
     expect((await api.getCases('member-1')).single.id, 'case-1');
@@ -209,6 +213,33 @@ void main() {
       symptoms: const ['Fever'],
     );
     expect(caseId, 'case-2');
+  });
+
+  test('patient API registers Android device tokens as ANDROID', () async {
+    final api = DioPatientApi(
+      client,
+      devicePlatform: MobileDevicePlatform.android,
+    );
+
+    await api.subscribeDevice('synthetic-android-device-token');
+
+    expect(adapter.lastRequest?.uri.path, '/api/v1/notifications/subscribe');
+    expect(adapter.lastRequest?.data, {
+      'deviceToken': 'synthetic-android-device-token',
+      'platform': 'ANDROID',
+    });
+  });
+
+  test('patient API registers iPhone device tokens as IOS', () async {
+    final api = DioPatientApi(client, devicePlatform: MobileDevicePlatform.ios);
+
+    await api.subscribeDevice('synthetic-ios-device-token');
+
+    expect(adapter.lastRequest?.uri.path, '/api/v1/notifications/subscribe');
+    expect(adapter.lastRequest?.data, {
+      'deviceToken': 'synthetic-ios-device-token',
+      'platform': 'IOS',
+    });
   });
 
   test('401 expires session and clears tokens', () async {

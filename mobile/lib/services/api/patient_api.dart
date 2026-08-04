@@ -26,10 +26,20 @@ abstract interface class PatientApi {
   });
 }
 
+enum MobileDevicePlatform {
+  android('ANDROID'),
+  ios('IOS');
+
+  const MobileDevicePlatform(this.apiValue);
+
+  final String apiValue;
+}
+
 class DioPatientApi implements PatientApi {
-  const DioPatientApi(this._client);
+  const DioPatientApi(this._client, {required this.devicePlatform});
 
   final ApiClient _client;
+  final MobileDevicePlatform devicePlatform;
 
   @override
   Future<List<Member>> getMembers() async {
@@ -71,10 +81,10 @@ class DioPatientApi implements PatientApi {
 
   @override
   Future<void> subscribeDevice(String token) async {
-    await _client.dio.post<void>('/notifications/subscribe', data: {
-      'deviceToken': token,
-      'platform': 'ANDROID',
-    });
+    await _client.dio.post<void>(
+      '/notifications/subscribe',
+      data: {'deviceToken': token, 'platform': devicePlatform.apiValue},
+    );
   }
 
   @override

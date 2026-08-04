@@ -5,6 +5,7 @@ import 'package:family_veda/services/api/mobile_api.dart';
 import 'package:family_veda/services/api/patient_api.dart';
 import 'package:family_veda/services/storage/member_preference_store.dart';
 import 'package:family_veda/services/storage/secure_token_store.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final tokenStoreProvider = Provider<TokenStore>((ref) => SecureTokenStore());
@@ -26,5 +27,10 @@ final mobileApiProvider = Provider<MobileApi>(
 );
 
 final patientApiProvider = Provider<PatientApi>(
-  (ref) => DioPatientApi(ref.watch(apiClientProvider)),
+  (ref) => DioPatientApi(
+    ref.watch(apiClientProvider),
+    devicePlatform: defaultTargetPlatform == TargetPlatform.iOS
+        ? MobileDevicePlatform.ios
+        : MobileDevicePlatform.android,
+  ),
 );
