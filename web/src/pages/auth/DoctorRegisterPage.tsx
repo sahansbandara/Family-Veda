@@ -5,6 +5,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { apiClient } from '../../services/apiClient'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { registerDoctorUser } from '../../store/slices/authSlice'
+import markUrl from '../../assets/mark.svg'
 
 export function DoctorRegisterPage() {
   const dispatch = useAppDispatch(); const navigate = useNavigate()
@@ -22,7 +23,7 @@ export function DoctorRegisterPage() {
     navigate('/doctor-status', { replace: true })
   }
 
-  return <main className="login-page"><section className="login-intro"><span className="brand-mark brand-mark--large" aria-hidden="true">FV</span><p className="eyebrow">Synthetic clinician enrolment</p><h1>Register for manual verification.</h1><p>Clinical access remains blocked until an administrator verifies the profile. Never enter a real registration number.</p></section>
+  return <main className="login-page"><section className="login-intro"><span className="brand-mark brand-mark--large"><img src={markUrl} alt="" width={64} height={64} /></span><p className="eyebrow">Synthetic clinician enrolment</p><h1>Register for manual verification.</h1><p>Clinical access remains blocked until an administrator verifies the profile. Never enter a real registration number.</p></section>
     <section className="login-card"><h2>Create doctor account</h2><form onSubmit={submit} noValidate>
       <label className="field"><span>Display name</span><input name="displayName" required maxLength={120} /></label>
       <label className="field"><span>Email</span><input name="email" type="email" required /></label>

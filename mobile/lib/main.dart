@@ -5,6 +5,7 @@ import 'package:family_veda/providers/core_providers.dart';
 import 'package:family_veda/router/app_router.dart';
 import 'package:family_veda/providers/push_registration_provider.dart';
 import 'package:family_veda/theme/app_theme.dart';
+import 'package:family_veda/theme/glass.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -61,6 +62,12 @@ class _FamilyVedaAppState extends ConsumerState<FamilyVedaApp> {
       title: 'Family Veda',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
+      darkTheme: buildAppTheme(brightness: Brightness.dark),
+      themeMode: ThemeMode.system,
+      // The ambient colour field every glass surface blurs. Wrapping here
+      // means each screen gets it without repeating itself.
+      builder: (context, child) =>
+          AmbientBackground(child: child ?? const SizedBox.shrink()),
       routerConfig: router,
     );
   }

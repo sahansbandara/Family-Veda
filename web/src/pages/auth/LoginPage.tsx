@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { signIn } from '../../store/slices/authSlice'
+import markUrl from '../../assets/mark.svg'
 
 const signInSchema = z.object({
   email: z.string().email('Enter a valid email address.'),
@@ -45,7 +46,7 @@ export function LoginPage() {
   return (
     <main className="login-page">
       <section className="login-intro" aria-labelledby="login-title">
-        <span className="brand-mark brand-mark--large" aria-hidden="true">FV</span>
+        <span className="brand-mark brand-mark--large"><img src={markUrl} alt="" width={64} height={64} /></span>
         <p className="eyebrow">Family Veda</p>
         <h1 id="login-title">Clinical context, ready for review.</h1>
         <p>A secure workspace for family health records, triage review, approvals, and access auditing.</p>

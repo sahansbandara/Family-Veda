@@ -1,5 +1,7 @@
 // [S4] Only final doctor-approved advisory is rendered on patient surface.
 import 'package:family_veda/providers/guidance_provider.dart';
+import 'package:family_veda/theme/app_theme.dart';
+import 'package:family_veda/theme/glass.dart';
 import 'package:family_veda/widgets/shared/async_state_views.dart';
 import 'package:family_veda/widgets/shared/clinical_disclaimer.dart';
 import 'package:flutter/material.dart';
@@ -33,31 +35,13 @@ class ApprovedGuidanceScreen extends ConsumerWidget {
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.check_circle,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            const SizedBox(width: 8),
-                            const Expanded(
-                              child: Text('Reviewed and approved by a doctor'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(value.finalAdvisory),
-                        const SizedBox(height: 16),
-                        Text('${value.doctorName} · ${value.approvedAtLabel}'),
-                      ],
-                    ),
-                  ),
+                // Doctor-approved clinical text. Opaque on purpose — this is
+                // the one thing on the screen a patient acts on, and it must
+                // stay fully legible over the ambient mesh.
+                _ApprovedAdvisory(
+                  advisory: value.finalAdvisory,
+                  attribution:
+                      '${value.doctorName} · ${value.approvedAtLabel}',
                 ),
                 const SizedBox(height: 16),
                 familialRisk.when(
@@ -80,6 +64,48 @@ class ApprovedGuidanceScreen extends ConsumerWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _ApprovedAdvisory extends StatelessWidget {
+  const _ApprovedAdvisory({required this.advisory, required this.attribution});
+
+  final String advisory;
+  final String attribution;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final success = isDark ? AppColors.successDark : AppColors.success;
+    final ink = isDark ? AppColors.textDark : AppColors.text;
+    final muted = isDark ? AppColors.mutedDark : AppColors.muted;
+    final base = isDark ? AppColors.surfaceDark : Colors.white;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Color.alphaBlend(success.withValues(alpha: 0.10), base),
+        border: Border.all(color: success.withValues(alpha: 0.38)),
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GlassPill(label: 'Doctor approved', color: success),
+          const SizedBox(height: 14),
+          Text(
+            advisory,
+            style: TextStyle(fontSize: 16, height: 1.55, color: ink),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            attribution,
+            style: TextStyle(fontSize: 13, color: muted),
+          ),
+        ],
       ),
     );
   }

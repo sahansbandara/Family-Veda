@@ -1,11 +1,12 @@
 import { BrowserRouter } from 'react-router-dom'
 
+import { AmbientMesh } from './components/layout/AmbientMesh'
 import { AppRoutes } from './routes/AppRouter'
-import './App.css'
 
 function App() {
   return (
     <BrowserRouter>
+      <AmbientMesh />
       <AppRoutes />
     </BrowserRouter>
   )

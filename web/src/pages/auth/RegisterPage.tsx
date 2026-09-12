@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { registerFamilyUser } from '../../store/slices/authSlice'
+import markUrl from '../../assets/mark.svg'
 
 const registrationSchema = z.object({
   displayName: z.string().trim().min(1, 'Enter your display name.').max(120),
@@ -33,7 +34,7 @@ export function RegisterPage() {
   }
 
   return <main className="login-page">
-    <section className="login-intro" aria-labelledby="register-title"><span className="brand-mark brand-mark--large" aria-hidden="true">FV</span><p className="eyebrow">Family Veda</p><h1 id="register-title">Create a synthetic family workspace.</h1><p>Set up the account first, then create the family and your linked head profile.</p></section>
+    <section className="login-intro" aria-labelledby="register-title"><span className="brand-mark brand-mark--large"><img src={markUrl} alt="" width={64} height={64} /></span><p className="eyebrow">Family Veda</p><h1 id="register-title">Create a synthetic family workspace.</h1><p>Set up the account first, then create the family and your linked head profile.</p></section>
     <section className="login-card" aria-labelledby="register-heading"><p className="eyebrow">Family registration</p><h2 id="register-heading">Create account</h2>
       <form onSubmit={submit} noValidate>
         <label className="field"><span>Display name</span><input value={displayName} autoComplete="name" onChange={(event) => setDisplayName(event.target.value)} /></label>

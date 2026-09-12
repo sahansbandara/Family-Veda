@@ -1,0 +1,131 @@
+/* Design tokens — see design.md.
+ *
+ * Three theme states must resolve: explicit light, explicit dark, and the
+ * un-stamped system default. Every token is declared in the bare :root block
+ * below before any media query or [data-theme] block redefines it. A token
+ * defined only inside one of those blocks renders one theme's text on the
+ * other theme's ground. */
+
+:root {
+  /* ── semantic colour — meaning, not decoration ─────────────────────── */
+  --primary:       #0f6d63;   /* CTA, active nav, approve */
+  --primary-lum:   #17a08f;   /* luminous pair, gradients and glass accents */
+  --background:    #edf3f2;
+  --surface:       #ffffff;
+  --border:        #c9d9d6;
+  --text:          #0e1e1b;
+  --muted:         #4a5f5b;
+  --faint:         #7c908c;
+  --danger:        #b3261e;
+  --warning:       #a66300;
+  --success:       #1f7a45;
+  --emergency:     #8b0000;   /* red-flag path only */
+  --agent:         #4a4a8f;   /* unapproved AI content */
+  --on-accent:     #ffffff;   /* text on primary/agent/emergency fills */
+
+  /* ── glass material ────────────────────────────────────────────────── */
+  --glass-tint:     #ffffff;
+  --glass-fill-hi:  rgba(255, 255, 255, 0.74);
+  --glass-fill-lo:  rgba(255, 255, 255, 0.40);
+  --glass-edge:     rgba(255, 255, 255, 0.70);
+  --glass-edge-dim: rgba(14, 50, 45, 0.10);
+  --glass-spec:     rgba(255, 255, 255, 0.95);
+  --glass-cast:     rgba(8, 48, 43, 0.20);
+
+  --blur-thin:    9px;
+  --blur-regular: 22px;
+  --blur-thick:   40px;
+  --blur:         var(--blur-regular);
+
+  /* ── ambient mesh — drawn from the brand mark ──────────────────────── */
+  --orb-a: #8bc53f;
+  --orb-b: #1fa07e;
+  --orb-c: #1b6ba8;
+  --orb-opacity: 0.42;
+
+  /* ── type ──────────────────────────────────────────────────────────── */
+  --font-sans: Inter, "Noto Sans Sinhala", system-ui, -apple-system,
+               BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-data: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  /* ── space · radius · elevation ────────────────────────────────────── */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+
+  --r-sm: 10px; --r-md: 14px; --r-lg: 18px; --r-xl: 22px; --r-pill: 999px;
+
+  --shadow-sm: 0 4px 12px -4px var(--glass-cast);
+  --shadow-md: 0 18px 44px -14px var(--glass-cast);
+
+  --shell: 1440px;
+  color-scheme: light;
+}
+
+/* System default (nothing stamped) plus an explicit dark OS preference.
+ * Guarded so an explicit light choice still wins. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --primary:       #3aa394;
+    --primary-lum:   #48d8c0;
+    --background:    #07100f;
+    --surface:       #0f1a18;
+    --border:        #22332f;
+    --text:          #e9f2f0;
+    --muted:         #9db2ae;
+    --faint:         #6b807c;
+    --danger:        #f2685f;
+    --warning:       #e0a44a;
+    --success:       #4bb574;
+    --emergency:     #ff4d4d;
+    --agent:         #8c8cd9;
+    --on-accent:     #06100e;
+
+    --glass-tint:     #7fe9d6;
+    --glass-fill-hi:  rgba(38, 74, 70, 0.62);
+    --glass-fill-lo:  rgba(20, 44, 41, 0.34);
+    --glass-edge:     rgba(126, 235, 214, 0.20);
+    --glass-edge-dim: rgba(0, 0, 0, 0.40);
+    --glass-spec:     rgba(160, 255, 238, 0.26);
+    --glass-cast:     rgba(0, 0, 0, 0.52);
+
+    --orb-a: #35591d;
+    --orb-b: #0e6f62;
+    --orb-c: #12506f;
+    --orb-opacity: 0.50;
+
+    color-scheme: dark;
+  }
+}
+
+/* Explicit dark choice wins over a light OS preference. */
+:root[data-theme="dark"] {
+  --primary:       #3aa394;
+  --primary-lum:   #48d8c0;
+  --background:    #07100f;
+  --surface:       #0f1a18;
+  --border:        #22332f;
+  --text:          #e9f2f0;
+  --muted:         #9db2ae;
+  --faint:         #6b807c;
+  --danger:        #f2685f;
+  --warning:       #e0a44a;
+  --success:       #4bb574;
+  --emergency:     #ff4d4d;
+  --agent:         #8c8cd9;
+  --on-accent:     #06100e;
+
+  --glass-tint:     #7fe9d6;
+  --glass-fill-hi:  rgba(38, 74, 70, 0.62);
+  --glass-fill-lo:  rgba(20, 44, 41, 0.34);
+  --glass-edge:     rgba(126, 235, 214, 0.20);
+  --glass-edge-dim: rgba(0, 0, 0, 0.40);
+  --glass-spec:     rgba(160, 255, 238, 0.26);
+  --glass-cast:     rgba(0, 0, 0, 0.52);
+
+  --orb-a: #35591d;
+  --orb-b: #0e6f62;
+  --orb-c: #12506f;
+  --orb-opacity: 0.50;
+
+  color-scheme: dark;
+}

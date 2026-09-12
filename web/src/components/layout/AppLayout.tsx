@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { signedOut } from '../../store/slices/authSlice'
 import type { UserRole } from '../../store/slices/authSlice'
 import { apiClient } from '../../services/apiClient'
+import markUrl from '../../assets/mark.svg'
 
 type NavItem = {
   label: string
@@ -22,6 +23,16 @@ const navItems: NavItem[] = [
   { label: 'Doctor verification', path: '/doctor-verification', roles: ['ADMIN'] },
 ]
 
+function initials(name: string | undefined): string {
+  if (!name) return '—'
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('')
+}
+
 export function AppLayout() {
   const dispatch = useAppDispatch()
   const user = useAppSelector((state) => state.auth.user)
@@ -35,9 +46,11 @@ export function AppLayout() {
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">Skip to main content</a>
-      <header className="topbar">
+      <header className="topbar glass glass--thick">
         <NavLink className="brand" to={user?.role === 'ONBOARDING' ? '/onboarding' : '/dashboard'} aria-label="Family Veda dashboard">
-          <span className="brand-mark" aria-hidden="true">FV</span>
+          <span className="brand-mark">
+            <img src={markUrl} alt="" width={42} height={42} />
+          </span>
           <span>
             <strong>Family Veda</strong>
             <small>Clinical workspace</small>
@@ -48,12 +61,13 @@ export function AppLayout() {
             <strong>{user?.name}</strong>
             <small>{user?.role.replaceAll('_', ' ')}</small>
           </span>
+          <span className="avatar" aria-hidden="true">{initials(user?.name)}</span>
           <button type="button" className="button button--secondary" onClick={() => void signOut()}>
             Sign out
           </button>
         </div>
       </header>
-      <nav className="primary-nav" aria-label="Primary navigation">
+      <nav className="primary-nav glass glass--thin" aria-label="Primary navigation">
         {visibleItems.map((item) => (
           <NavLink key={item.path} to={item.path} className={({ isActive }) => isActive ? 'active' : undefined}>
             {item.label}
