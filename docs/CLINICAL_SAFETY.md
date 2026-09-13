@@ -64,8 +64,8 @@ The check is a rule table with unit tests, not a prompt instruction. New pattern
             │    "Seek immediate in-person medical care."
             │    • Emergency number 1990 (Suwa Seriya)
             │    • Nearest hospital list
-            │    • Case broadcast to all verified doctors
-            │    • Family Head notified immediately
+            │    • Assigned doctor notified only with active grant
+            │    • Patient account (or minor's guardian) notified
             │    ✘ NO AI-generated guidance shown. NONE.
             │
       MISS  └──► normal triage → doctor approval gate
@@ -81,7 +81,7 @@ The red-flag check runs **before any LLM output could reach the user**. This ord
 
 | Pattern | One carrier/affected parent | Both carriers | Permitted output |
 |---|---|---|---|
-| Autosomal recessive | 0% affected · 50% carrier | 25% affected · 50% carrier | Screening indicated; second-parent status required |
+| Autosomal recessive | If other parent is confirmed not a carrier: 0% affected · 50% carrier. If status is unknown: no numeric affected-risk claim | If both parents are confirmed carriers: 25% affected · 50% carrier | Screening indicated; second-parent status required |
 | Autosomal dominant | 50% affected | — | Screening indicated |
 | X-linked recessive | Depends on the child's sex and which parent | — | Screening indicated; sex-specific note |
 | Polygenic / multifactorial | Increased relative risk only | — | Risk factor noted; **no predictive claim** |

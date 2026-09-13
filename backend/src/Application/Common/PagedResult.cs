@@ -1,0 +1,15 @@
+namespace FamilyVeda.Application.Common;
+
+public sealed record PagedResult<T>(IReadOnlyList<T> Items, int Page, int PageSize, int TotalCount)
+{
+    public int TotalPages => TotalCount == 0 ? 0 : (int)Math.Ceiling(TotalCount / (double)PageSize);
+}
+
+public sealed class ForbiddenException(string message = "Access denied.") : Exception(message);
+public sealed class NotFoundException(string message = "Resource not found.") : Exception(message);
+public sealed class ConflictException(string message) : Exception(message);
+public sealed class ProcessingException(string message) : Exception(message);
+public sealed class ValidationException(IReadOnlyDictionary<string, string[]> errors) : Exception("Validation failed.")
+{
+    public IReadOnlyDictionary<string, string[]> Errors { get; } = errors;
+}

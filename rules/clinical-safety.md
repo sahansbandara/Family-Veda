@@ -33,7 +33,7 @@ Breaking one is a **CRITICAL** review finding and blocks merge, regardless of wh
 ## Genetics
 
 - Never claim inheritance. Claim a screening indication.
-- Autosomal recessive, one carrier parent = **0% affected, 50% carrier**. Both carriers = 25% affected, 50% carrier.
+- Autosomal recessive, one confirmed carrier parent plus one confirmed non-carrier parent = **0% affected, 50% carrier**. If the other parent's status is unknown, make no numeric affected-risk claim and report `unknownParties`. Both confirmed carriers = 25% affected, 50% carrier.
 - Always report `unknownParties` when a contributing parent's status is unknown.
 - `relationships.is_biological = false` is excluded from every hereditary computation.
 - The inheritance table is hardcoded and cited. **The LLM never generates probabilities.**

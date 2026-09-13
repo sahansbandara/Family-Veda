@@ -1,0 +1,45 @@
+using FamilyVeda.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Testcontainers.PostgreSql;
+
+namespace FamilyVeda.IntegrationTests;
+
+public sealed class MigrationTests : IAsyncLifetime
+{
+    private readonly PostgreSqlContainer _database = new PostgreSqlBuilder()
+        .WithImage("postgres:16-alpine")
+        .WithDatabase("familyveda_test")
+        .WithUsername("familyveda_test")
+        .WithPassword($"test-{Guid.NewGuid():N}")
+        .Build();
+
+    public Task InitializeAsync() => _database.StartAsync();
+    public Task DisposeAsync() => _database.DisposeAsync().AsTask();
+
+    [Fact]
+    public async Task InitialMigration_AppliesToEmptyPostgreSql16Database()
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseNpgsql(_database.GetConnectionString())
+            .UseSnakeCaseNamingConvention()
+            .Options;
+        await using var dbContext = new AppDbContext(options);
+
+        await dbContext.Database.MigrateAsync();
+
+        var applied = await dbContext.Database.GetAppliedMigrationsAsync();
+        Assert.Contains(applied, migration => migration.EndsWith("20260804_ALL_InitialSchema", StringComparison.Ordinal));
+        Assert.Contains(applied, migration => migration.EndsWith("20260804_ALL_AddNotificationSubscriptions", StringComparison.Ordinal));
+        Assert.Contains(applied, migration => migration.EndsWith("20260804_ALL_EnforceCaseGrantConcurrency", StringComparison.Ordinal));
+        Assert.Contains(applied, migration => migration.EndsWith("20260804_ALL_EnforceMemberAccountOwnership", StringComparison.Ordinal));
+        var applicationTableCount = await dbContext.Database.SqlQueryRaw<int>(
+                "SELECT COUNT(*)::int AS \"Value\" FROM information_schema.tables WHERE table_schema = 'public' AND table_name <> '__EFMigrationsHistory'")
+            .SingleAsync();
+        Assert.Equal(21, applicationTableCount);
+        var grantIndex = await dbContext.Database.SqlQueryRaw<string>(
+                "SELECT indexdef AS \"Value\" FROM pg_indexes WHERE schemaname = 'public' AND indexname = 'ix_case_access_grants_triage_case_id'")
+            .SingleAsync();
+        Assert.Contains("UNIQUE", grantIndex, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("revoked_at IS NULL", grantIndex, StringComparison.OrdinalIgnoreCase);
+    }
+}

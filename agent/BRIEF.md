@@ -122,13 +122,13 @@ Full reasoning and reserved extension points: blueprint §18, mirrored in `docs/
 
 ## Data model
 
-Full schema: `docs/DATABASE.md`. 18 tables across four owners.
+Full schema: `docs/DATABASE.md`. 20 tables across four owners.
 
 | Owner | Tables |
 |---|---|
 | S1 | `users` `families` `members` `relationships` `consents` |
 | S2 | `health_records` `lab_reports` `lab_values` `vitals` `hereditary_flags` |
-| S3 | `episodes` `triage_cases` `agent_traces` |
+| S3 | `episodes` `triage_cases` `agent_traces` `notification_subscriptions` |
 | S4 | `doctors` `doctor_verification_log` `family_doctor_assignments` `case_access_grants` `approvals` `audit_log` |
 
 **Two-stage model — the core design idea:** raw records stay member-scoped (Stage 1, Extraction Agent). Only small, consented, structured `hereditary_flags` cross member boundaries (Stage 2, Familial Risk Agent). *Flags cross, files don't.*

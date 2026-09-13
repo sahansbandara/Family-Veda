@@ -146,8 +146,8 @@ Every transition writes a `doctor_verification_log` row with actor and reason.
    SHARED POOL — any VERIFIED doctor may claim
        │                    grant created on claim
        ▼
-   EMERGENCY priority → immediate pool broadcast
-                        + notify all verified doctors
+   EMERGENCY priority → de-identified claim pool
+                        + notify active-grant doctor only
 ```
 
 ## Agent permissions

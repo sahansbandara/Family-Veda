@@ -46,8 +46,8 @@ build/
 **/android/app/release/
 
 # ── Uploaded lab report files (synthetic, but never committed) ──
-storage/
-uploads/
+/storage/
+/uploads/
 **/lab-reports/*.jpg
 **/lab-reports/*.png
 **/lab-reports/*.pdf

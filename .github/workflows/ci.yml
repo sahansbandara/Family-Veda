@@ -31,7 +31,7 @@ jobs:
       - id: check
         run: |
           backend=false; web=false; mobile=false
-          if ls backend/*.sln backend/**/*.csproj >/dev/null 2>&1; then backend=true; fi
+          if [ -f backend/FamilyVeda.slnx ] || find backend -name '*.csproj' -print -quit | grep -q .; then backend=true; fi
           if [ -f web/package.json ]; then web=true; fi
           if [ -f mobile/pubspec.yaml ]; then mobile=true; fi
           {
@@ -63,15 +63,21 @@ jobs:
 
       - name: Restore
         if: needs.detect.outputs.backend == 'true'
-        run: dotnet restore
+        run: |
+          dotnet restore tests/UnitTests/FamilyVeda.UnitTests.csproj
+          dotnet restore tests/IntegrationTests/FamilyVeda.IntegrationTests.csproj
 
       - name: Build
         if: needs.detect.outputs.backend == 'true'
-        run: dotnet build --no-restore --configuration Release
+        run: |
+          dotnet build tests/UnitTests/FamilyVeda.UnitTests.csproj --no-restore --configuration Release
+          dotnet build tests/IntegrationTests/FamilyVeda.IntegrationTests.csproj --no-restore --configuration Release
 
       - name: Test
         if: needs.detect.outputs.backend == 'true'
-        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --logger trx
+        run: |
+          dotnet test tests/UnitTests/FamilyVeda.UnitTests.csproj --no-build --configuration Release --collect:"XPlat Code Coverage" --logger trx
+          dotnet test tests/IntegrationTests/FamilyVeda.IntegrationTests.csproj --no-build --configuration Release --collect:"XPlat Code Coverage" --logger trx
 
       - name: Upload coverage
         if: needs.detect.outputs.backend == 'true'
