@@ -1,5 +1,6 @@
 // [S1] Identity, Family & Consent.
 import 'package:family_veda/providers/auth_provider.dart';
+import 'package:family_veda/widgets/shared/brand_mark.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -56,7 +57,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Icon(Icons.family_restroom, size: 56),
+                    const BrandMark(size: 72, semanticLabel: 'Family Veda'),
                     const SizedBox(height: 16),
                     Text(
                       'Family Veda',

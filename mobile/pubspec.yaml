@@ -70,6 +70,11 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  assets:
+    # Brand mark. Density variants live in 2.0x/ and 3.0x/ and are resolved
+    # automatically. Regenerate with brand/generate-icons.sh.
+    - assets/brand/
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

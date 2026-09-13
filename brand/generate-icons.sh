@@ -88,4 +88,14 @@ for entry in "${IOS_ICONS[@]}"; do
   plate "$TMP/mark1024.png" "$px" 10 white "$IOS/$name"
 done
 
+# ── flutter in-app mark ────────────────────────────────────────────────────
+# Rendered inside the app (splash, login), not just as a launcher icon.
+# Flutter resolves the 2.0x/ and 3.0x/ variants automatically.
+echo "==> flutter in-app mark"
+BRAND="$ROOT/mobile/assets/brand"
+mkdir -p "$BRAND/2.0x" "$BRAND/3.0x"
+magick "$TMP/mark1024.png" -resize 96x96   -background none -gravity center -extent 96x96   "$BRAND/mark.png"
+magick "$TMP/mark1024.png" -resize 192x192 -background none -gravity center -extent 192x192 "$BRAND/2.0x/mark.png"
+magick "$TMP/mark1024.png" -resize 288x288 -background none -gravity center -extent 288x288 "$BRAND/3.0x/mark.png"
+
 echo "==> done"

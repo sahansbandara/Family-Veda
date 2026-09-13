@@ -1,4 +1,5 @@
 // [S1] Identity, Family & Consent.
+import 'package:family_veda/widgets/shared/brand_mark.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -6,15 +7,16 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const Scaffold(
+    backgroundColor: Colors.transparent,
     body: SafeArea(
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.family_restroom, size: 56),
-            SizedBox(height: 16),
+            BrandMark(size: 88),
+            SizedBox(height: 24),
             CircularProgressIndicator(),
-            SizedBox(height: 12),
+            SizedBox(height: 14),
             Text('Opening Family Veda securely…'),
           ],
         ),
