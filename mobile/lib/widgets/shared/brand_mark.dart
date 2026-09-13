@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// The Family Veda mark — heart (family) over shield with cross (the safety
-/// gate).
+/// The geometric Family Veda mark — heart (family) over shield with cross (the
+/// safety gate). Vector-derived, so it stays legible at small sizes.
+///
+/// Use this in chrome: app bars, list rows, anywhere under ~64 dp.
 ///
 /// Decorative wherever a "Family Veda" wordmark sits beside it, so it carries
 /// no semantic label by default; pass [semanticLabel] when it stands alone.
@@ -15,6 +17,32 @@ class BrandMark extends StatelessWidget {
   Widget build(BuildContext context) {
     return Image.asset(
       'assets/brand/mark.png',
+      width: size,
+      height: size,
+      semanticLabel: semanticLabel,
+      excludeFromSemantics: semanticLabel == null,
+      filterQuality: FilterQuality.high,
+    );
+  }
+}
+
+/// The full illustrated logo — the family doctor, the family, and the shield.
+///
+/// Carries far more detail than [BrandMark], so it only belongs on surfaces
+/// that give it room: the splash and login screens. Below roughly 96 dp the
+/// faces turn to mush — use [BrandMark] there instead.
+///
+/// The source art is transparent, so it sits correctly on both themes.
+class BrandLogo extends StatelessWidget {
+  const BrandLogo({super.key, this.size = 140, this.semanticLabel});
+
+  final double size;
+  final String? semanticLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      'assets/brand/logo.png',
       width: size,
       height: size,
       semanticLabel: semanticLabel,

@@ -46,6 +46,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final loading = auth.status == AuthStatus.loading;
     final cleanupRequired = auth.status == AuthStatus.cleanupRequired;
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -57,7 +58,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const BrandMark(size: 72, semanticLabel: 'Family Veda'),
+                    const BrandLogo(size: 116, semanticLabel: 'Family Veda'),
                     const SizedBox(height: 16),
                     Text(
                       'Family Veda',

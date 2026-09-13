@@ -6,21 +6,41 @@ class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => const Scaffold(
-    backgroundColor: Colors.transparent,
-    body: SafeArea(
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            BrandMark(size: 88),
-            SizedBox(height: 24),
-            CircularProgressIndicator(),
-            SizedBox(height: 14),
-            Text('Opening Family Veda securely…'),
-          ],
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const BrandLogo(size: 168, semanticLabel: 'Family Veda'),
+              const SizedBox(height: 20),
+              Text(
+                'Family Veda',
+                style: theme.textTheme.displaySmall?.copyWith(fontSize: 30),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Healthier families, brighter tomorrows',
+                style: theme.textTheme.bodySmall,
+              ),
+              const SizedBox(height: 32),
+              const SizedBox(
+                width: 26,
+                height: 26,
+                child: CircularProgressIndicator(strokeWidth: 2.6),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Opening Family Veda securely…',
+                style: theme.textTheme.bodySmall,
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

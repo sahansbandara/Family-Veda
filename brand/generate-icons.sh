@@ -98,4 +98,39 @@ magick "$TMP/mark1024.png" -resize 96x96   -background none -gravity center -ext
 magick "$TMP/mark1024.png" -resize 192x192 -background none -gravity center -extent 192x192 "$BRAND/2.0x/mark.png"
 magick "$TMP/mark1024.png" -resize 288x288 -background none -gravity center -extent 288x288 "$BRAND/3.0x/mark.png"
 
+# ── illustrated logo ───────────────────────────────────────────────────────
+# Built from brand/source/. The emblem already ships with alpha; the lockup is
+# on an opaque white ground, so its background is flood-filled from the border
+# only. A global -transparent white would eat the doctor's coat, the cross and
+# the white keylines, which are the same colour as the background.
+#
+# Low fuzz matters: at 6% the fill leaks through anti-aliased edges into the
+# coat. 2% is clean.
+SRC="$ROOT/brand/source"
+if [ -f "$SRC/mark.png" ] && [ -f "$SRC/lockup.png" ]; then
+  echo "==> illustrated logo"
+  magick "$SRC/mark.png" -trim +repage "$DIST/logo.png"
+  magick "$SRC/lockup.png" -alpha set -bordercolor white -border 1 \
+         -fuzz 2% -fill none -floodfill +0+0 white -shave 1x1 \
+         -trim +repage "$DIST/lockup.png"
+
+  for pair in "160:$BRAND/logo.png" "320:$BRAND/2.0x/logo.png" "480:$BRAND/3.0x/logo.png"; do
+    px="${pair%%:*}"; out="${pair##*:}"
+    magick "$DIST/logo.png" -resize "${px}x${px}" -background none \
+           -gravity center -extent "${px}x${px}" "$out"
+  done
+  magick "$DIST/logo.png" -resize 512x512 -background none \
+         -gravity center -extent 512x512 "$ROOT/web/src/assets/logo.png"
+
+  if command -v pngquant >/dev/null; then
+    for f in "$ROOT/web/src/assets/logo.png" "$BRAND/logo.png" \
+             "$BRAND/2.0x/logo.png" "$BRAND/3.0x/logo.png" \
+             "$DIST/logo.png" "$DIST/lockup.png"; do
+      pngquant --quality=72-94 --speed 1 --force --output "$f" "$f" 2>/dev/null || true
+    done
+  fi
+else
+  echo "==> skipping illustrated logo (brand/source/ is empty)"
+fi
+
 echo "==> done"

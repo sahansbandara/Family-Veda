@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="brand/dist/lockup.png" alt="Family Veda — healthier families, brighter tomorrows" width="380">
+</p>
+
 # Family Veda
 
 > **Your family doctor, with your family's whole story.**
