@@ -1,0 +1,27 @@
+using FamilyVeda.Application.Common;
+using FamilyVeda.Domain.Common;
+
+namespace FamilyVeda.Application.Clinical;
+
+public sealed record DoctorDto(Guid Id, Guid UserId, string RegistrationNumberLastFour, VerificationStatus VerificationStatus, string? Specialty);
+public sealed record RegisterDoctorRequest(string RegistrationNumber, string? Specialty);
+public sealed record VerifyDoctorRequest(VerificationStatus Status, string? Reason);
+public sealed record VerificationReasonRequest(string? Reason);
+public sealed record ApprovalRequest(ApprovalAction Action, string? DoctorNotes, string? FinalAdvisory);
+public sealed record ApprovalContentRequest(string? DoctorNotes, string? FinalAdvisory);
+public sealed record ApprovalDto(Guid Id, Guid TriageCaseId, Guid DoctorId, ApprovalAction Action, DateTimeOffset DecidedAt);
+public sealed record AuditDto(Guid Id, string EventType, string ResourceType, Guid? ResourceId, string Outcome, DateTimeOffset CreatedAt);
+public sealed record AvailableCaseDto(Guid Id, TriagePriority Priority, DateTimeOffset CreatedAt);
+
+public interface IClinicalService
+{
+    Task<DoctorDto> RegisterDoctorAsync(RegisterDoctorRequest request, CancellationToken cancellationToken);
+    Task<DoctorDto> GetMyDoctorAsync(CancellationToken cancellationToken);
+    Task<PagedResult<DoctorDto>> GetPendingDoctorsAsync(int page, int pageSize, CancellationToken cancellationToken);
+    Task<DoctorDto> ChangeVerificationAsync(Guid doctorId, VerifyDoctorRequest request, CancellationToken cancellationToken);
+    Task<PagedResult<FamilyVeda.Application.Triage.TriageCaseDto>> GetMyCasesAsync(int page, int pageSize, CancellationToken cancellationToken);
+    Task<PagedResult<AvailableCaseDto>> GetAvailableCasesAsync(int page, int pageSize, CancellationToken cancellationToken);
+    Task<ApprovalDto> ClaimCaseAsync(Guid caseId, CancellationToken cancellationToken);
+    Task<ApprovalDto> DecideCaseAsync(Guid caseId, ApprovalRequest request, CancellationToken cancellationToken);
+    Task<PagedResult<AuditDto>> GetAuditAsync(Guid? subjectMemberId, int page, int pageSize, CancellationToken cancellationToken);
+}

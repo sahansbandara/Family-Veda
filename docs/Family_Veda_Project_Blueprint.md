@@ -620,7 +620,7 @@ STAGE 2 — FAMILIAL ANALYSIS (family-wide)            [S4]
 
 | Pattern | One carrier/affected parent | Both carriers | System output |
 |---|---|---|---|
-| Autosomal recessive (β-thalassaemia, cystic fibrosis) | 0% affected · 50% carrier | 25% affected · 50% carrier | Screening indicated; second-parent status required |
+| Autosomal recessive (β-thalassaemia, cystic fibrosis) | If other parent is confirmed not a carrier: 0% affected · 50% carrier. If status is unknown: no numeric affected-risk claim | If both parents are confirmed carriers: 25% affected · 50% carrier | Screening indicated; second-parent status required |
 | Autosomal dominant (Huntington's, familial hypercholesterolaemia) | 50% affected | — | Screening indicated |
 | X-linked recessive (haemophilia, G6PD deficiency) | Depends on child's sex and which parent | — | Screening indicated; sex-specific note |
 | Polygenic / multifactorial (type 2 diabetes, hypertension, alopecia) | Increased relative risk only | — | Risk factor noted; **no predictive claim** |
@@ -633,7 +633,7 @@ STAGE 2 — FAMILIAL ANALYSIS (family-wide)            [S4]
 |---|---|
 | LLM unavailable or times out | `AGENT_FAILED`; member sees "Please consult your doctor directly"; no partial output |
 | Output fails schema validation | Retry once; second failure → safe failure path |
-| Red-flag symptom detected | Bypass queue → `ESCALATED` → immediate doctor broadcast + emergency guidance |
+| Red-flag symptom detected | Bypass LLM → `ESCALATED` → deterministic referral; active-grant doctor notification only |
 | Confidence below threshold | Case still goes to a doctor, marked `LOW_CONFIDENCE`, draft advisory hidden |
 | Denied tool call attempted | Hard error, logged as violation, workflow halts |
 | No doctor available within SLA | Escalate to shared pool; if still unassigned → advise in-person care |
@@ -690,7 +690,7 @@ This is what the doctor's Agent Trace panel renders and what is shown to the exa
             │    "Seek immediate in-person medical care."
             │    • Emergency number 1990 (Suwa Seriya)
             │    • Nearest hospital list
-            │    • Case broadcast to all verified doctors
+            │    • Active-grant doctor notified; shared pool stays de-identified
             │    • Family Head notified immediately
             │    ✘ NO AI-generated guidance shown. NONE.
             │
@@ -720,7 +720,7 @@ This is what the doctor's Agent Trace panel renders and what is shown to the exa
              ┌───────────────┼───────────────┐
              ▼               ▼               ▼
        ┌──────────┐   ┌───────────┐   ┌───────────┐
-       │ families │   │  doctors  │   │  admins   │
+       │ families │   │  doctors  │   │ ADMIN user│
        └────┬─────┘   └─────┬─────┘   └───────────┘
             │ 1:N            │
             ▼                │
@@ -906,14 +906,14 @@ Index: `idx_vitals_member_time` — the baseline query index
 | condition_name | varchar(200) | NOT NULL |
 | inheritance_pattern | enum | `AUTOSOMAL_RECESSIVE`, `AUTOSOMAL_DOMINANT`, `X_LINKED`, `POLYGENIC` |
 | status | enum | `CONFIRMED`, `SUSPECTED`, `RULED_OUT` |
-| evidence_ref | uuid | FK → lab_reports(id) or health_records(id) |
-| evidence_type | enum | `LAB_REPORT`, `HEALTH_RECORD`, `CLINICIAN_ENTERED` |
+| lab_report_id | uuid | FK → lab_reports(id), NULLABLE |
+| health_record_id | uuid | FK → health_records(id), NULLABLE |
 | confidence | numeric(3,2) | 0.00–1.00 |
 | extracted_by | varchar(50) | `EXTRACTION_AGENT` or `MANUAL` |
 | verified_by_doctor_id | uuid | FK → doctors(id), NULLABLE |
 | created_at | timestamptz | NOT NULL |
 
-Constraint: `UNIQUE(member_id, condition_code)` · Indexes: `idx_flags_member`, `idx_flags_condition`
+Constraints: `UNIQUE(member_id, condition_code)` · exactly one of `lab_report_id` / `health_record_id` is present. Indexes: `idx_flags_member`, `idx_flags_condition`
 
 ## 8.4 Triage and Agents — Owner S3
 
@@ -963,7 +963,7 @@ Indexes: `idx_cases_status_priority`, `idx_cases_doctor`, `idx_cases_member`
 | agent_name / agent_version | varchar | NOT NULL |
 | input_summary | jsonb | |
 | input_hash | varchar(64) | SHA-256 |
-| tools_requested / tools_denied | jsonb | arrays — **violations visible here** |
+| tools_requested / tools_allowed / tools_denied | jsonb | arrays — enforcement evidence and violations visible here |
 | output_summary | jsonb | |
 | output_schema_valid | boolean | |
 | confidence | numeric(3,2) | |
@@ -1413,8 +1413,8 @@ Every transition writes a `doctor_verification_log` row with actor and reason.
    SHARED POOL — any VERIFIED doctor may claim
        │                    grant created on claim
        ▼
-   EMERGENCY priority → immediate pool broadcast
-                        + notify all verified doctors
+   EMERGENCY priority → de-identified claim pool
+                        + notify active-grant doctor only
 ```
 
 ## 12.3 Access Is by Grant, Not by Role
@@ -2015,7 +2015,7 @@ Deferred. No public API to the Sri Lanka Medical Council register currently exis
 | 2 | What makes your agents *distinct*? | Different scope (member vs family), different tool allow-lists, different output schemas; one is fully deterministic. Show the tool permission matrix (§6.4) |
 | 3 | Your AI touches medical data. Justify it. | It does not diagnose. It assembles context. No output reaches a patient without licensed doctor approval, enforced architecturally |
 | 4 | Does the agent read the whole family's records? | No. Raw records stay member-scoped. Only consented structured hereditary flags cross profile boundaries. The familial agent's raw-record tool is denied at the dispatch layer |
-| 5 | Father is a thalassaemia carrier — does the son have it? | No. Autosomal recessive requires both parents to be carriers. One carrier parent gives 0% affected, 50% carrier. Our output reports `unknownParties` and recommends screening |
+| 5 | Father is a thalassaemia carrier — does the son have it? | We cannot conclude that. If the other parent's status is unknown, we make no numeric affected-risk claim; we report `unknownParties` and indicate screening |
 | 6 | What is deterministic validation? | Fixed rule tables, reference ranges and JSON schema checks. Same input, same output. Not LLM judgement |
 | 7 | What if the LLM fails or hallucinates? | Schema validation, one retry, then safe failure. Patient sees "consult your doctor directly", never a partial or unapproved output |
 | 8 | What does the AI do in an emergency? | Deliberately less. A deterministic red-flag check runs before any LLM output could surface. The user sees a referral and emergency contacts, not AI guidance |

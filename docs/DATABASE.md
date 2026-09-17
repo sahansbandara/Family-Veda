@@ -1,6 +1,6 @@
 # Database Design — Family Veda
 
-PostgreSQL 16 · EF Core 8 + Npgsql · 18 tables · source: blueprint §8.
+PostgreSQL 16 · EF Core 8 + Npgsql · 20 tables · source: implemented EF migrations.
 
 ## Entity relationship overview
 
@@ -11,8 +11,9 @@ PostgreSQL 16 · EF Core 8 + Npgsql · 18 tables · source: blueprint §8.
              ┌───────────────┼───────────────┐
              ▼               ▼               ▼
        ┌──────────┐   ┌───────────┐   ┌───────────┐
-       │ families │   │  doctors  │   │  admins   │
-       └────┬─────┘   └─────┬─────┘   └───────────┘
+       │ families │   │  doctors  │   │ ADMIN is  │
+       └────┬─────┘   └─────┬─────┘   │ user_type │
+                                           └───────────┘
             │ 1:N            │
             ▼                │
       ┌───────────┐          │
@@ -54,13 +55,15 @@ PostgreSQL 16 · EF Core 8 + Npgsql · 18 tables · source: blueprint §8.
            └─────────────┘
 ```
 
+`ADMIN` is a `users.user_type`, not a separate table.
+
 ## Ownership
 
 | Owner | Tables |
 |---|---|
 | **S1** | `users` `families` `members` `relationships` `consents` |
 | **S2** | `health_records` `lab_reports` `lab_values` `vitals` `hereditary_flags` |
-| **S3** | `episodes` `triage_cases` `agent_traces` |
+| **S3** | `episodes` `triage_cases` `agent_traces` `notification_subscriptions` |
 | **S4** | `doctors` `doctor_verification_log` `family_doctor_assignments` `case_access_grants` `approvals` `audit_log` |
 
 ---
@@ -214,14 +217,14 @@ Index: `idx_vitals_member_time` — **the baseline query index**
 | condition_name | varchar(200) | NOT NULL |
 | inheritance_pattern | enum | `AUTOSOMAL_RECESSIVE`, `AUTOSOMAL_DOMINANT`, `X_LINKED`, `POLYGENIC` |
 | status | enum | `CONFIRMED`, `SUSPECTED`, `RULED_OUT` |
-| evidence_ref | uuid | FK → lab_reports(id) or health_records(id) |
-| evidence_type | enum | `LAB_REPORT`, `HEALTH_RECORD`, `CLINICIAN_ENTERED` |
+| lab_report_id | uuid | FK → lab_reports(id), NULLABLE |
+| health_record_id | uuid | FK → health_records(id), NULLABLE |
 | confidence | numeric(3,2) | 0.00–1.00 |
 | extracted_by | varchar(50) | `EXTRACTION_AGENT` or `MANUAL` |
 | verified_by_doctor_id | uuid | FK → doctors(id), NULLABLE |
 | created_at | timestamptz | NOT NULL |
 
-Constraint: `UNIQUE(member_id, condition_code)` · Indexes: `idx_flags_member` · `idx_flags_condition`
+Constraints: `UNIQUE(member_id, condition_code)` · exactly one of `lab_report_id` / `health_record_id` is present. Indexes: `idx_flags_member` · `idx_flags_condition`
 
 > **This is the only clinical data permitted to cross member boundaries**, and only when consented. Raw records never cross. *Flags cross, files don't.*
 
@@ -275,7 +278,7 @@ Indexes: `idx_cases_status_priority` · `idx_cases_doctor` · `idx_cases_member`
 | agent_name / agent_version | varchar | NOT NULL |
 | input_summary | jsonb | |
 | input_hash | varchar(64) | SHA-256 |
-| tools_requested / tools_denied | jsonb | arrays — **violations are visible here** |
+| tools_requested / tools_allowed / tools_denied | jsonb | arrays — enforcement evidence and violations are visible here |
 | output_summary | jsonb | |
 | output_schema_valid | boolean | |
 | confidence | numeric(3,2) | |
@@ -286,6 +289,21 @@ Indexes: `idx_cases_status_priority` · `idx_cases_doctor` · `idx_cases_member`
 | created_at | timestamptz | NOT NULL |
 
 Constraint: `UNIQUE(triage_case_id, step_number)`
+
+### `notification_subscriptions`
+
+| Column | Type | Constraints |
+|---|---|---|
+| id | uuid | PK |
+| user_id | uuid | FK → users(id) ON DELETE CASCADE, NOT NULL |
+| token_hash | varchar(64) | UNIQUE SHA-256 fingerprint, NOT NULL |
+| protected_token | varchar(4096) | ASP.NET Data Protection ciphertext, NOT NULL |
+| platform | varchar(24) | `ANDROID`, `IOS`, or `WEB` |
+| is_active | boolean | NOT NULL |
+| last_seen_at | timestamptz | NOT NULL |
+| created_at / updated_at | timestamptz | NOT NULL |
+
+The FCM token is decrypted only inside the backend notification client. It is never returned by an API, logged, or stored in Markdown.
 
 ---
 

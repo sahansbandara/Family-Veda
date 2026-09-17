@@ -1,0 +1,25 @@
+// [S3] Triage & Agent Orchestration.
+class AppNotification {
+  const AppNotification({
+    required this.id,
+    required this.createdAt,
+    required this.isRead,
+    this.caseId,
+    this.caseStatus,
+  });
+
+  factory AppNotification.fromJson(Map<String, dynamic> json) =>
+      AppNotification(
+        id: json['id'] as String,
+        createdAt: DateTime.parse(json['createdAt'] as String),
+        isRead: (json['isRead'] as bool?) ?? false,
+        caseId: json['caseId'] as String?,
+        caseStatus: (json['caseStatus'] ?? json['status']) as String?,
+      );
+
+  final String id;
+  final DateTime createdAt;
+  final bool isRead;
+  final String? caseId;
+  final String? caseStatus;
+}

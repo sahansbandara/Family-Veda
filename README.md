@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="brand/dist/lockup.png" alt="Family Veda — healthier families, brighter tomorrows" width="380">
+</p>
+
 # Family Veda
 
 > **Your family doctor, with your family's whole story.**
@@ -38,7 +42,7 @@ Family Veda closes that gap. A family maintains one shared account with individu
               ▼                           ▼
    ┌────────────────────┐    ┌──────────────────────────────┐
    │    POSTGRESQL 16   │    │   CONTROLLED AGENTIC AI      │
-   │  18 tables         │    │   Coordinator / Planner      │
+   │  20 tables         │    │   Coordinator / Planner      │
    │  EF Core migrations│    │    ├─ Extraction Agent       │
    └────────────────────┘    │    ├─ Context Agent          │
                              │    ├─ Analysis Agent         │
@@ -169,6 +173,39 @@ cd mobile && flutter pub get && flutter run
 
 > Setup commands are written against the structure defined in blueprint §14.1.2. They become runnable as each project is scaffolded during W2.
 
+## Live demo access
+
+- Web: <https://family-veda-web.vercel.app>
+- API health: <https://family-veda-api.onrender.com/health>
+- Mobile API base URL: `https://family-veda-api.onrender.com/api/v1`
+
+All accounts below are synthetic and use the same demo password.
+
+| Role | Email |
+|---|---|
+| Family Head | `demo-head@example.invalid` |
+| Adult Member | `demo-member@example.invalid` |
+| Verified Doctor | `demo-doctor@example.invalid` |
+| Pending Doctor | `demo-pending@example.invalid` |
+| Clinic Admin | `demo-admin@example.invalid` |
+
+The password is intentionally not committed. On the deployment owner's Mac, copy it from Keychain without printing it into terminal history:
+
+```bash
+security find-generic-password \
+  -a demo-evaluator \
+  -s FamilyVedaDemoPassword \
+  -w | pbcopy
+```
+
+Paste it into the app, then clear the clipboard immediately:
+
+```bash
+pbcopy </dev/null
+```
+
+Avoid retrieving it while screen-sharing or recording. Share the password with evaluators through a private channel. Never place it in Git, issues, screenshots or chat history.
+
 ## Testing
 
 ```bash
@@ -200,7 +237,7 @@ Test plan and the 8 priority cases: [`docs/TESTING.md`](docs/TESTING.md).
 |---|---|
 | [`docs/Family_Veda_Project_Blueprint.md`](docs/Family_Veda_Project_Blueprint.md) | Full blueprint — the source of truth |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System architecture and integration rules |
-| [`docs/DATABASE.md`](docs/DATABASE.md) | Schema, 18 tables, state machines, seed policy |
+| [`docs/DATABASE.md`](docs/DATABASE.md) | Schema, 20 tables, state machines, seed policy |
 | [`docs/API_CONTRACT.md`](docs/API_CONTRACT.md) | Endpoints, conventions, status codes |
 | [`docs/AGENTS_DESIGN.md`](docs/AGENTS_DESIGN.md) | Agents, tool permission matrix, traces |
 | [`docs/CLINICAL_SAFETY.md`](docs/CLINICAL_SAFETY.md) | Advice boundaries, emergency path, genetics framing |
