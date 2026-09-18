@@ -1,6 +1,6 @@
 # Architecture Decision Records — Family Veda
 
-Nine ADRs, worth 3–6 pages of the consolidated report. Format: **Context → Options → Decision → Consequences → Status.**
+Twelve ADRs, worth 3–6 pages of the consolidated report. Format: **Context → Options → Decision → Consequences → Status.**
 
 | ADR | Title | Owner | Status |
 |---|---|---|---|
@@ -9,10 +9,13 @@ Nine ADRs, worth 3–6 pages of the consolidated report. Format: **Context → O
 | [ADR-003](ADR-003-two-stage-familial-model.md) | Two-stage familial data model | S4 | Accepted |
 | [ADR-004](ADR-004-react-state-management.md) | React state management | S3 | Accepted |
 | [ADR-005](ADR-005-flutter-state-management.md) | Flutter state management | S2 | Accepted |
-| [ADR-006](ADR-006-local-llm-ollama.md) | Local LLM via Ollama | S3 | Accepted |
+| [ADR-006](ADR-006-local-llm-ollama.md) | Local LLM via Ollama | S3 | Superseded by ADR-012 |
 | [ADR-007](ADR-007-deterministic-safety-layer.md) | Deterministic safety layer | S4 | Accepted |
 | [ADR-008](ADR-008-access-by-grant.md) | Access by grant, not by role | S4 | Accepted |
 | [ADR-009](ADR-009-async-over-video.md) | Async consultation over video | S3 | Accepted |
+| [ADR-010](ADR-010-cloud-deployment-platform.md) | Cloud deployment platform | S1 | Proposed |
+| [ADR-011](ADR-011-agent-workflow-state-schema.md) | Agent workflow-state schema | S3 | Proposed |
+| [ADR-012](ADR-012-hosted-llm-inference.md) | Hosted LLM inference | S3 | Proposed |
 
 ## Writing rule
 

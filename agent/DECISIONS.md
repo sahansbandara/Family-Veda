@@ -256,12 +256,29 @@ Working decision log. Formal, report-grade ADRs live in `docs/adr/` (ADR-001 …
 
 ---
 
+## 2026-09-18 — Fully hosted system; hosted inference and durable storage
+
+**Decision:** the evaluated system runs entirely on hosted services. Agent inference moves from local Ollama to Groq's free OpenAI-compatible API (`llama-3.1-8b-instant`) through `ChatCompletionsLlmClient`, selected by `Llm__Provider`. Lab-report files move to PostgreSQL (`bytea`, 10 MB cap) and Data Protection keys to PostgreSQL, so both survive Render restarts. Swagger is served on the deployed API.
+
+**Reason:** the specification (§14, §16, §17.1) requires the agentic subsystem to execute during evaluation and asks for a working Swagger URL; the team also requires a fully working hosted product rather than a laptop-dependent demo. Render free has 512 MB RAM — too small for any local model — and no persistent disk.
+
+**Alternatives considered:** Hugging Face Space running Ollama (free, 20–40 s per call, sleeps after 48 h) · Oracle Cloud free VM (card signup, uncertain approval) · tunnel to a laptop (not always on) · Supabase/R2 object storage (new vendor and keys) · Render paid disk (cost).
+
+**Consequences:** synthetic prompts leave team hardware and go to Groq over HTTPS; ADR-006's privacy argument is replaced by "synthetic data only, minimum fields, key server-side, deterministic safety and doctor approval unchanged". Groq free-tier rate limits fail closed through the existing retry/safe-failure path. Neon free storage (0.5 GB) caps total uploads.
+
+**Ownership:** all remaining work is built for the whole project, but S1/S2/S3 component changes are reviewed and merged by their owners from their own accounts to keep Git evidence honest.
+
+**Status:** Accepted by S4 (2026-09-18); ADR-012 records it for S3 review.
+
+---
+
 ## Open decisions
 
 | # | Question | Owner | Decide by |
 |---|---|---|---|
 | 1 | Confirm the S1–S4 component allocation | All | W1 meeting |
-| 2 | Ollama model latency confirmation on actual demo hardware | S3 | Before live Ollama verification |
+| 2 | ~~Ollama model latency on demo hardware~~ — superseded by hosted Groq (2026-09-18) | S3 | — |
+| 6 | S1's distinct agent for the 12-mark individual agentic criterion — proposed Consent & Access Verification Agent | All | 20 Sep 2026 |
 
 ## Decision rule
 
