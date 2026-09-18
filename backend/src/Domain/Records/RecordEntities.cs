@@ -25,6 +25,15 @@ public sealed class LabReport : Entity
     public string? OcrErrorCode { get; set; }
     public DateTimeOffset? CollectedAt { get; set; }
     public ICollection<LabValue> Values { get; set; } = [];
+    public LabReportFile? File { get; set; }
+}
+
+/// <summary>Uploaded lab-report image bytes, stored in PostgreSQL so they survive host restarts (ADR-010).</summary>
+public sealed class LabReportFile : Entity
+{
+    public Guid LabReportId { get; set; }
+    public LabReport? LabReport { get; set; }
+    public required byte[] Content { get; set; }
 }
 
 public sealed class LabValue : Entity

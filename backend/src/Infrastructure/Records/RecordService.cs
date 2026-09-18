@@ -140,32 +140,31 @@ public sealed class RecordService(AppDbContext dbContext, ICurrentUser currentUs
         if (!allowed.TryGetValue(contentType, out var extensions) || !extensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
             throw new ValidationException(new Dictionary<string, string[]> { ["file"] = ["Only PNG and JPEG lab-report images are supported."] });
 
-        var root = Path.GetFullPath(options.LabReportPath);
-        Directory.CreateDirectory(root);
-        var storedFileName = $"{Guid.NewGuid():N}{extension}";
-        var destination = Path.Combine(root, storedFileName);
-        await using (var output = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.None, 81920, FileOptions.Asynchronous))
-            await content.CopyToAsync(output, cancellationToken);
-        var actualLength = new FileInfo(destination).Length;
-        if (actualLength != sizeBytes || actualLength > options.MaxUploadBytes ||
-            !await HasSafeImageDimensionsAsync(destination, contentType, cancellationToken))
+        using var buffer = new MemoryStream();
+        var chunk = new byte[81920];
+        int read;
+        while ((read = await content.ReadAsync(chunk, cancellationToken)) > 0)
         {
-            File.Delete(destination);
-            throw new ValidationException(new Dictionary<string, string[]> { ["file"] = ["File size or content does not match request metadata."] });
+            if (buffer.Length + read > options.MaxUploadBytes)
+                throw new ValidationException(new Dictionary<string, string[]> { ["file"] = ["File size or content does not match request metadata."] });
+            buffer.Write(chunk, 0, read);
         }
+        buffer.Position = 0;
+        if (buffer.Length != sizeBytes || !await HasSafeImageDimensionsAsync(buffer, contentType, cancellationToken))
+            throw new ValidationException(new Dictionary<string, string[]> { ["file"] = ["File size or content does not match request metadata."] });
 
         var report = new LabReport
         {
             MemberId = memberId,
             OriginalFileName = Path.GetFileName(originalFileName),
-            StoredFileName = storedFileName,
+            StoredFileName = $"db:{Guid.NewGuid():N}{extension}",
             ContentType = contentType,
-            SizeBytes = actualLength,
+            SizeBytes = buffer.Length,
             CollectedAt = collectedAt
         };
+        report.File = new LabReportFile { LabReport = report, Content = buffer.ToArray() };
         dbContext.LabReports.Add(report);
-        try { await dbContext.SaveChangesAsync(cancellationToken); }
-        catch { File.Delete(destination); throw; }
+        await dbContext.SaveChangesAsync(cancellationToken);
         return MapLabReport(report);
     }
 
@@ -274,9 +273,8 @@ public sealed class RecordService(AppDbContext dbContext, ICurrentUser currentUs
     private static LabReportDetailDto MapLabDetail(LabReport report, IReadOnlyList<HereditaryFlagDto> flags) => new(
         report.Id, report.MemberId, report.OriginalFileName, report.OcrStatus, report.CollectedAt,
         report.Values.OrderBy(x => x.Analyte).Select(x => new LabValueDto(x.Id, x.Analyte, x.Value, x.Unit, x.ReferenceLow, x.ReferenceHigh, x.WasManuallyConfirmed)).ToList(), flags);
-    private static async Task<bool> HasSafeImageDimensionsAsync(string path, string contentType, CancellationToken cancellationToken)
+    private static async Task<bool> HasSafeImageDimensionsAsync(Stream stream, string contentType, CancellationToken cancellationToken)
     {
-        await using var stream = File.OpenRead(path);
         var dimensions = contentType switch
         {
             "image/png" => await ReadPngDimensionsAsync(stream, cancellationToken),
