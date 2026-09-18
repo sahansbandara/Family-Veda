@@ -84,6 +84,42 @@ public sealed class NotificationServiceTests
         push.Tokens.Should().Equal("adult-device-token-synthetic-0001");
     }
 
+    [Theory]
+    [InlineData("timeout")]
+    [InlineData("http")]
+    [InlineData("credential")]
+    public async Task PushFailure_NeverPropagatesIntoTheClinicalWorkflow(string failure)
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+        await using var db = new AppDbContext(options);
+        var adult = User("synthetic-push-failure@example.invalid");
+        var family = new Family { Name = "Synthetic Family", CreatedByUser = adult };
+        var member = new Member { Family = family, User = adult, DisplayName = "Synthetic Adult", DateOfBirth = new DateOnly(1990, 1, 1), Role = FamilyRole.Head };
+        var episode = new Episode { Member = member, SymptomsJson = JsonSerializer.Serialize(new[] { "cough" }), DurationDays = 1, Severity = 2 };
+        var triageCase = new TriageCase { Member = member, Episode = episode, Status = TriageStatus.Planning };
+        db.AddRange(adult, family, member, episode, triageCase);
+        await db.SaveChangesAsync();
+        var currentUser = new MutableCurrentUser { UserId = adult.Id, UserType = UserType.FamilyUser };
+        Exception error = failure switch
+        {
+            "timeout" => new TaskCanceledException("Synthetic FCM timeout"),
+            "http" => new HttpRequestException("Synthetic FCM 503"),
+            _ => new InvalidOperationException("Synthetic invalid service account")
+        };
+        var service = new NotificationService(db, currentUser, new EphemeralDataProtectionProvider(), new ThrowingPushClient(error), NullLogger<NotificationService>.Instance);
+        await service.SubscribeAsync(new NotificationSubscriptionRequest("adult-device-token-synthetic-0001", "ANDROID"), CancellationToken.None);
+
+        var send = () => service.SendCaseStatusAsync(triageCase.Id, TriageStatus.PendingDoctorReview, CancellationToken.None);
+
+        await send.Should().NotThrowAsync();
+    }
+
+    private sealed class ThrowingPushClient(Exception error) : IPushNotificationClient
+    {
+        public Task SendAsync(IReadOnlyCollection<string> deviceTokens, string eventType, IReadOnlyDictionary<string, string> metadata, CancellationToken cancellationToken) =>
+            Task.FromException(error);
+    }
+
     private static UserAccount User(string email) => new()
     {
         Email = email,

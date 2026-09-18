@@ -21,6 +21,7 @@ public sealed class FcmPushNotificationClient(HttpClient httpClient, IConfigurat
             .CreateScoped(MessagingScope);
         var accessToken = await credential.UnderlyingCredential.GetAccessTokenForRequestAsync(cancellationToken: cancellationToken);
 
+        var failures = 0;
         foreach (var token in deviceTokens)
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, $"v1/projects/{Uri.EscapeDataString(projectId)}/messages:send");
@@ -33,8 +34,19 @@ public sealed class FcmPushNotificationClient(HttpClient httpClient, IConfigurat
                     data = metadata.Append(new KeyValuePair<string, string>("eventType", eventType)).ToDictionary()
                 }
             });
-            using var response = await httpClient.SendAsync(request, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            // One stale or invalid device token must not stop delivery to the recipient's other devices.
+            try
+            {
+                using var response = await httpClient.SendAsync(request, cancellationToken);
+                if (!response.IsSuccessStatusCode) failures++;
+            }
+            catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException && !cancellationToken.IsCancellationRequested)
+            {
+                failures++;
+            }
         }
+
+        if (failures > 0)
+            throw new HttpRequestException($"FCM delivery failed for {failures} of {deviceTokens.Count} device token(s).");
     }
 }

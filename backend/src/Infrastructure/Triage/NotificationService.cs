@@ -120,8 +120,10 @@ public sealed class NotificationService(
                 ["status"] = status.ToString()
             }, cancellationToken);
         }
-        catch (HttpRequestException exception)
+        catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
         {
+            // Push is best-effort: FCM timeouts, HTTP errors or bad credentials must never undo or block
+            // the clinical status change that has already been committed. The inbox still shows the event.
             logger.LogWarning(exception, "Push delivery failed for case {CaseId} with status {Status}", caseId, status);
         }
     }
