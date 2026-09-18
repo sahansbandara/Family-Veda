@@ -36,6 +36,18 @@ internal sealed class LabReportConfiguration : IEntityTypeConfiguration<LabRepor
     }
 }
 
+internal sealed class LabReportFileConfiguration : IEntityTypeConfiguration<LabReportFile>
+{
+    public void Configure(EntityTypeBuilder<LabReportFile> builder)
+    {
+        builder.ToTable("lab_report_files");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Content).HasColumnType("bytea").IsRequired();
+        builder.HasOne(x => x.LabReport).WithOne(x => x.File).HasForeignKey<LabReportFile>(x => x.LabReportId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasIndex(x => x.LabReportId).IsUnique();
+    }
+}
+
 internal sealed class LabValueConfiguration : IEntityTypeConfiguration<LabValue>
 {
     public void Configure(EntityTypeBuilder<LabValue> builder)

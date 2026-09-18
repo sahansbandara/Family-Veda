@@ -70,9 +70,9 @@ Full plan: `docs/HOSTED_COMPLIANCE_PLAN.md`. Audit: `docs/SPEC_COMPLIANCE_AUDIT.
 - [ ] Verify `/swagger` and one full triage case on hosted system
 
 ### H2 Durable persistence (P1 — take migration lock)
-- [ ] [S2] Lab-report bytes stored in PostgreSQL (`ILabReportStorage`), 10 MB cap
-- [ ] [S1] Data Protection keys persisted in PostgreSQL
-- [ ] [S2+S1] One migration `*_ALL_AddDurableStorage`
+- [x] [S2] Lab-report bytes stored in PostgreSQL (`lab_report_files`), 10 MB cap — PR #5
+- [x] [S1] Data Protection keys persisted in PostgreSQL (`DataProtection__PersistToDatabase`) — PR #5
+- [x] [S2+S1] Migration `20260918_ALL_AddDurableStorage` — PR #5 (take migration lock before merge)
 - [ ] [S2] Upload survives Render restart (evidence)
 
 ### H3 Third-party (P1)

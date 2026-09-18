@@ -25,8 +25,8 @@ services:
         sync: false
       - key: Storage__LabReportPath
         value: /app/storage/lab-reports
-      - key: DataProtection__KeysPath
-        value: /app/keys
+      - key: DataProtection__PersistToDatabase
+        value: "true"
       - key: Storage__MaxUploadBytes
         value: "10485760"
       - key: Llm__Provider

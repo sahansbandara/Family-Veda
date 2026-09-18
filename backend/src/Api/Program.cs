@@ -39,7 +39,10 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
 var dataProtection = builder.Services.AddDataProtection();
 var keysPath = builder.Configuration["DataProtection:KeysPath"];
-if (!string.IsNullOrWhiteSpace(keysPath)) dataProtection.PersistKeysToFileSystem(new DirectoryInfo(Path.GetFullPath(keysPath)));
+if (builder.Configuration.GetValue("DataProtection:PersistToDatabase", false))
+    dataProtection.PersistKeysToDbContext<AppDbContext>();
+else if (!string.IsNullOrWhiteSpace(keysPath))
+    dataProtection.PersistKeysToFileSystem(new DirectoryInfo(Path.GetFullPath(keysPath)));
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 

@@ -147,10 +147,26 @@ public sealed class ToolDispatcher(ToolRegistry registry, AppDbContext dbContext
 
     private async Task<object> ExtractOcrTextAsync(Guid memberId, Guid reportId, CancellationToken ct)
     {
-        var storedFileName = await dbContext.LabReports.AsNoTracking().Where(x => x.Id == reportId && x.MemberId == memberId)
-            .Select(x => x.StoredFileName).SingleAsync(ct);
-        var path = Path.Combine(Path.GetFullPath(storageOptions.Value.LabReportPath), storedFileName);
-        return await ocrService.ExtractTextAsync(path, ct);
+        var report = await dbContext.LabReports.AsNoTracking().Where(x => x.Id == reportId && x.MemberId == memberId)
+            .Select(x => new { x.StoredFileName, Content = x.File != null ? x.File.Content : null }).SingleAsync(ct);
+        if (report.Content is null)
+        {
+            // Legacy upload stored on the container filesystem before durable storage (ADR-010).
+            var legacyPath = Path.Combine(Path.GetFullPath(storageOptions.Value.LabReportPath), report.StoredFileName);
+            return await ocrService.ExtractTextAsync(legacyPath, ct);
+        }
+
+        // Tesseract reads from disk: materialise a short-lived temp copy of the durable bytes, then delete it.
+        var tempPath = Path.Combine(Path.GetTempPath(), $"fv-ocr-{Guid.NewGuid():N}{Path.GetExtension(report.StoredFileName)}");
+        try
+        {
+            await File.WriteAllBytesAsync(tempPath, report.Content, ct);
+            return await ocrService.ExtractTextAsync(tempPath, ct);
+        }
+        finally
+        {
+            File.Delete(tempPath);
+        }
     }
 
     private async Task<object> WriteLabExtractionAsync(Guid memberId, Guid reportId, object? arguments, CancellationToken ct)
