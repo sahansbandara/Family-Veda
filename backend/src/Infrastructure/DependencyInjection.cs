@@ -41,12 +41,24 @@ public static class DependencyInjection
         services.AddScoped<IClinicalService, ClinicalService>();
         services.AddSingleton<ITriageWorkQueue, TriageWorkQueue>();
         services.AddSingleton<SafetyValidationService>();
-        services.Configure<OllamaOptions>(configuration.GetSection(OllamaOptions.SectionName));
-        services.AddHttpClient<IOllamaClient, OllamaClient>((provider, client) =>
+        var geminiKey = configuration["Gemini:ApiKey"];
+        if (!string.IsNullOrWhiteSpace(geminiKey))
         {
-            var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<OllamaOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
-        });
+            services.Configure<GeminiOptions>(configuration.GetSection(GeminiOptions.SectionName));
+            services.AddHttpClient<IOllamaClient, GeminiClient>(client =>
+            {
+                client.BaseAddress = new Uri("https://generativelanguage.googleapis.com/");
+            });
+        }
+        else
+        {
+            services.Configure<OllamaOptions>(configuration.GetSection(OllamaOptions.SectionName));
+            services.AddHttpClient<IOllamaClient, OllamaClient>((provider, client) =>
+            {
+                var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<OllamaOptions>>().Value;
+                client.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
+            });
+        }
         services.AddSingleton<ToolRegistry>();
         services.AddScoped<IToolDispatcher, ToolDispatcher>();
         services.AddScoped<IAgent, ContextAgent>();
