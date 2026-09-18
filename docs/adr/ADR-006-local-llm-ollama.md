@@ -1,6 +1,6 @@
 # ADR-006 — Local LLM via Ollama
 
-**Owner:** S3 · **Status:** Accepted · **Date:** 2026-08-06
+**Owner:** S3 · **Status:** Superseded by [ADR-012](ADR-012-hosted-llm-inference.md) (2026-09-18) · **Date:** 2026-08-06
 
 ## Context
 

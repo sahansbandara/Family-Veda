@@ -2,11 +2,12 @@ using FamilyVeda.Domain.Clinical;
 using FamilyVeda.Domain.Identity;
 using FamilyVeda.Domain.Records;
 using FamilyVeda.Domain.Triage;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace FamilyVeda.Infrastructure.Persistence;
 
-public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IDataProtectionKeyContext
 {
     // S1 — identity, family, consent
     public DbSet<UserAccount> Users => Set<UserAccount>();
@@ -19,6 +20,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     // S2 — records and extraction
     public DbSet<HealthRecord> HealthRecords => Set<HealthRecord>();
     public DbSet<LabReport> LabReports => Set<LabReport>();
+    public DbSet<LabReportFile> LabReportFiles => Set<LabReportFile>();
     public DbSet<LabValue> LabValues => Set<LabValue>();
     public DbSet<Vital> Vitals => Set<Vital>();
     public DbSet<HereditaryFlag> HereditaryFlags => Set<HereditaryFlag>();
@@ -36,6 +38,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<CaseAccessGrant> CaseAccessGrants => Set<CaseAccessGrant>();
     public DbSet<Approval> Approvals => Set<Approval>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
+    // S1 — ASP.NET Data Protection key ring, persisted so protected tokens survive restarts (ADR-010)
+    public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
