@@ -42,11 +42,24 @@ public static class DependencyInjection
         services.AddSingleton<ITriageWorkQueue, TriageWorkQueue>();
         services.AddSingleton<SafetyValidationService>();
         services.Configure<OllamaOptions>(configuration.GetSection(OllamaOptions.SectionName));
-        services.AddHttpClient<IOllamaClient, OllamaClient>((provider, client) =>
+        services.Configure<LlmOptions>(configuration.GetSection(LlmOptions.SectionName));
+        var llmProvider = configuration[$"{LlmOptions.SectionName}:Provider"] ?? "ollama";
+        if (string.Equals(llmProvider, LlmOptions.OpenAiCompatible, StringComparison.OrdinalIgnoreCase))
         {
-            var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<OllamaOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
-        });
+            services.AddHttpClient<IOllamaClient, ChatCompletionsLlmClient>((provider, client) =>
+            {
+                var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<LlmOptions>>().Value;
+                client.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
+            });
+        }
+        else
+        {
+            services.AddHttpClient<IOllamaClient, OllamaClient>((provider, client) =>
+            {
+                var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<OllamaOptions>>().Value;
+                client.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
+            });
+        }
         services.AddSingleton<ToolRegistry>();
         services.AddScoped<IToolDispatcher, ToolDispatcher>();
         services.AddScoped<IAgent, ContextAgent>();
