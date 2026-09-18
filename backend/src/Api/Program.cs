@@ -118,6 +118,20 @@ builder.Services.AddHostedService<TriageWorker>();
 builder.Services.AddHostedService<CaseSlaWorker>();
 
 var app = builder.Build();
+if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
+{
+    // Fail fast on configuration the hosted system cannot work without; push is optional (warn only).
+    var missing = new[] { "ConnectionStrings:DefaultConnection", "Cors:AllowedOrigins" }
+        .Where(key => string.IsNullOrWhiteSpace(app.Configuration[key])).ToList();
+    if (string.Equals(app.Configuration["Llm:Provider"], "openai-compatible", StringComparison.OrdinalIgnoreCase) &&
+        string.IsNullOrWhiteSpace(app.Configuration["Llm:ApiKey"]))
+        missing.Add("Llm:ApiKey");
+    if (missing.Count > 0)
+        throw new InvalidOperationException($"Missing required production configuration: {string.Join(", ", missing)}.");
+    if (string.IsNullOrWhiteSpace(app.Configuration["Fcm:ProjectId"]) || string.IsNullOrWhiteSpace(app.Configuration["Fcm:ServiceAccountJson"]))
+        app.Logger.LogWarning("FCM is not configured; push delivery is disabled and the notification inbox is the only channel.");
+}
+
 app.UseMiddleware<ExceptionMiddleware>();
 // Swagger is served in every environment by default so the evaluator can reach /swagger on the
 // deployed API (SE3090 §14). It documents endpoints only; every endpoint still enforces JWT auth.

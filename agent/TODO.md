@@ -76,9 +76,9 @@ Full plan: `docs/HOSTED_COMPLIANCE_PLAN.md`. Audit: `docs/SPEC_COMPLIANCE_AUDIT.
 - [ ] [S2] Upload survives Render restart (evidence)
 
 ### H3 Third-party (P1)
-- [ ] [S3] FCM client timeout + failure handling; push failure never breaks clinical state
+- [x] [S3] FCM client 10 s timeout, per-token failure isolation; push failure never breaks clinical state — PR #6
 - [ ] [human] Firebase project + `Fcm__ProjectId` / `Fcm__ServiceAccountJson` on Render
-- [ ] [S1] Startup config validation (fail: DB/JWT/CORS/LLM; warn: FCM)
+- [x] [S1] Startup config validation (fail: DB/JWT/CORS/LLM key; warn: FCM) — PR #6
 
 ### H4 Functional scope (P1)
 - [ ] [S2/S3/S4/S1] Allow-listed `sortBy`/`sortDir` on records, cases, approvals, audit

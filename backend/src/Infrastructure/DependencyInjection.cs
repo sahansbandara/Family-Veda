@@ -37,7 +37,10 @@ public static class DependencyInjection
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<ICaseSlaProcessor, CaseSlaProcessor>();
         services.AddHttpClient<IPushNotificationClient, FcmPushNotificationClient>(client =>
-            client.BaseAddress = new Uri("https://fcm.googleapis.com/"));
+        {
+            client.BaseAddress = new Uri("https://fcm.googleapis.com/");
+            client.Timeout = TimeSpan.FromSeconds(10);
+        });
         services.AddScoped<IClinicalService, ClinicalService>();
         services.AddSingleton<ITriageWorkQueue, TriageWorkQueue>();
         services.AddSingleton<SafetyValidationService>();
