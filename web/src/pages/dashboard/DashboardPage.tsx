@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { StatusBadge } from '../../components/shared/StatusBadge'
 import { ErrorState } from '../../components/shared/ViewState'
 import { apiClient, type FamilyDashboardDto, type FamilyDto, type PagedResult, type TriageCaseDto } from '../../services/apiClient'
 import { useAppSelector } from '../../store/hooks'
@@ -42,7 +41,7 @@ export function DashboardPage() {
         </div>
         <div className="live-status-pill">
           <span className="pulse-dot" aria-hidden="true" />
-          <StatusBadge status={isDoctor ? 'VERIFIED' : 'ACTIVE'} />
+          <span>{isDoctor ? 'VERIFIED' : 'ACTIVE'}</span>
         </div>
       </section>
 
@@ -56,26 +55,26 @@ export function DashboardPage() {
         <ErrorState message="Workspace summary could not be loaded." onRetry={() => void load()} />
       ) : (
         <section className="metric-grid" aria-label="Workspace summary">
-          <article className="metric-card">
+          <article className="metric-card metric-card--teal">
             <div className="metric-card-top">
               <span>Open items</span>
-              <span className="metric-icon-badge" aria-hidden="true">📋</span>
+              <span className="metric-icon-badge metric-icon-badge--teal" aria-hidden="true">📋</span>
             </div>
             <strong>{metrics?.first ?? 0}</strong>
             <small>Within your permitted scope</small>
           </article>
-          <article className="metric-card">
+          <article className="metric-card metric-card--amber">
             <div className="metric-card-top">
               <span>Awaiting review</span>
-              <span className="metric-icon-badge" aria-hidden="true">⏳</span>
+              <span className="metric-icon-badge metric-icon-badge--amber" aria-hidden="true">⏳</span>
             </div>
             <strong>{metrics?.second ?? 0}</strong>
             <small>Requires authorized action</small>
           </article>
-          <article className="metric-card">
+          <article className="metric-card metric-card--blue">
             <div className="metric-card-top">
               <span>{isDoctor ? 'Approved' : 'Records visible'}</span>
-              <span className="metric-icon-badge" aria-hidden="true">🛡️</span>
+              <span className="metric-icon-badge metric-icon-badge--blue" aria-hidden="true">🛡️</span>
             </div>
             <strong>{metrics?.third ?? 0}</strong>
             <small>Access-controlled data</small>
@@ -93,14 +92,14 @@ export function DashboardPage() {
         <div className="action-grid">
           {isDoctor ? (
             <>
-              <Link className="action-card" to="/cases">
+              <Link className="action-card action-card--teal" to="/cases">
                 <div className="action-card-header">
                   <strong>Review triage queue</strong>
                   <span className="action-card-arrow" aria-hidden="true">→</span>
                 </div>
                 <span>Open verified case grants and structured context.</span>
               </Link>
-              <Link className="action-card" to="/approvals">
+              <Link className="action-card action-card--blue" to="/approvals">
                 <div className="action-card-header">
                   <strong>Complete approvals</strong>
                   <span className="action-card-arrow" aria-hidden="true">→</span>
@@ -110,7 +109,7 @@ export function DashboardPage() {
             </>
           ) : (
             <>
-              <Link className="action-card" to="/records">
+              <Link className="action-card action-card--teal" to="/records">
                 <div className="action-card-header">
                   <strong>Browse records</strong>
                   <span className="action-card-arrow" aria-hidden="true">→</span>
@@ -118,7 +117,7 @@ export function DashboardPage() {
                 <span>Search permitted family record summaries.</span>
               </Link>
               {user?.role !== 'MEMBER' && (
-                <Link className="action-card" to="/audit">
+                <Link className="action-card action-card--blue" to="/audit">
                   <div className="action-card-header">
                     <strong>Review access history</strong>
                     <span className="action-card-arrow" aria-hidden="true">→</span>

@@ -11,30 +11,30 @@
   --primary-lum:    #14b8a6;   /* luminous pair, gradients and glass accents */
   --primary-subtle: #e6f7f5;   /* soft badge and tint backgrounds */
   --primary-hover:  #0a6b61;   /* interactive hover state */
-  --background:     #f7faf9;   /* luminous, crisp healthcare off-white */
+  --background:     #eff5f3;   /* luminous, fresh healthcare off-white with gentle sage tint */
   --surface:        #ffffff;   /* pure white card and panel surfaces */
-  --surface-subtle: #f0f6f5;   /* secondary panel and table header fills */
-  --border:         #d4e2df;   /* clean slate/sage card and divider borders */
-  --border-subtle:  #e6efed;   /* table rules and subtle dividers */
+  --surface-subtle: #e7f1ee;   /* secondary panel and table header fills */
+  --border:         #cedfdc;   /* clean slate/sage card and divider borders */
+  --border-subtle:  #e0ebe8;   /* table rules and subtle dividers */
   --text:           #0e1e1c;   /* high contrast dark charcoal-teal */
-  --text-heading:   #071513;   /* prominent title color */
-  --muted:          #4b615d;   /* secondary explanatory text */
-  --faint:          #768d89;   /* captions, labels, timestamps */
+  --text-heading:   #061a17;   /* prominent title color */
+  --muted:          #46605a;   /* secondary explanatory text */
+  --faint:          #6f8984;   /* captions, labels, timestamps */
   --danger:         #b3261e;
   --warning:        #a66300;
-  --success:        #1f7a45;
+  --success:        #167946;
   --emergency:      #8b0000;   /* red-flag path only */
   --agent:          #4a4a8f;   /* unapproved AI content */
   --on-accent:      #ffffff;   /* text on primary/agent/emergency fills */
 
   /* ── glass material — luminous white clinical glass ────────────────── */
   --glass-tint:     #ffffff;
-  --glass-fill-hi:  rgba(255, 255, 255, 0.94);
-  --glass-fill-lo:  rgba(255, 255, 255, 0.78);
+  --glass-fill-hi:  rgba(255, 255, 255, 0.95);
+  --glass-fill-lo:  rgba(255, 255, 255, 0.82);
   --glass-edge:     rgba(255, 255, 255, 0.98);
-  --glass-edge-dim: rgba(13, 130, 118, 0.12);
+  --glass-edge-dim: rgba(13, 130, 118, 0.14);
   --glass-spec:     rgba(255, 255, 255, 1);
-  --glass-cast:     rgba(15, 60, 50, 0.08);
+  --glass-cast:     rgba(15, 60, 50, 0.07);
 
   --blur-thin:    10px;
   --blur-regular: 22px;
@@ -45,7 +45,7 @@
   --orb-a: #86efac;  /* fresh spring mint */
   --orb-b: #5eead4;  /* clinical healing teal */
   --orb-c: #93c5fd;  /* clear sky blue */
-  --orb-opacity: 0.28;
+  --orb-opacity: 0.42;
 
   /* ── type ──────────────────────────────────────────────────────────── */
   --font-sans: Inter, "Noto Sans Sinhala", system-ui, -apple-system,
