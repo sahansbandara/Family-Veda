@@ -1,51 +1,55 @@
 /* Design tokens — see design.md.
  *
- * Three theme states must resolve: explicit light, explicit dark, and the
- * un-stamped system default. Every token is declared in the bare :root block
- * below before any media query or [data-theme] block redefines it. A token
- * defined only inside one of those blocks renders one theme's text on the
- * other theme's ground. */
+ * Default is a radiant, clean, clinical white theme.
+ * Explicit dark mode is activated when [data-theme="dark"] is stamped.
+ */
 
-:root {
+:root,
+:root[data-theme="light"] {
   /* ── semantic colour — meaning, not decoration ─────────────────────── */
-  --primary:       #0f6d63;   /* CTA, active nav, approve */
-  --primary-lum:   #17a08f;   /* luminous pair, gradients and glass accents */
-  --background:    #edf3f2;
-  --surface:       #ffffff;
-  --border:        #c9d9d6;
-  --text:          #0e1e1b;
-  --muted:         #4a5f5b;
-  --faint:         #7c908c;
-  --danger:        #b3261e;
-  --warning:       #a66300;
-  --success:       #1f7a45;
-  --emergency:     #8b0000;   /* red-flag path only */
-  --agent:         #4a4a8f;   /* unapproved AI content */
-  --on-accent:     #ffffff;   /* text on primary/agent/emergency fills */
+  --primary:        #0d8276;   /* CTA, active nav, approve */
+  --primary-lum:    #14b8a6;   /* luminous pair, gradients and glass accents */
+  --primary-subtle: #e6f7f5;   /* soft badge and tint backgrounds */
+  --primary-hover:  #0a6b61;   /* interactive hover state */
+  --background:     #f7faf9;   /* luminous, crisp healthcare off-white */
+  --surface:        #ffffff;   /* pure white card and panel surfaces */
+  --surface-subtle: #f0f6f5;   /* secondary panel and table header fills */
+  --border:         #d4e2df;   /* clean slate/sage card and divider borders */
+  --border-subtle:  #e6efed;   /* table rules and subtle dividers */
+  --text:           #0e1e1c;   /* high contrast dark charcoal-teal */
+  --text-heading:   #071513;   /* prominent title color */
+  --muted:          #4b615d;   /* secondary explanatory text */
+  --faint:          #768d89;   /* captions, labels, timestamps */
+  --danger:         #b3261e;
+  --warning:        #a66300;
+  --success:        #1f7a45;
+  --emergency:      #8b0000;   /* red-flag path only */
+  --agent:          #4a4a8f;   /* unapproved AI content */
+  --on-accent:      #ffffff;   /* text on primary/agent/emergency fills */
 
-  /* ── glass material ────────────────────────────────────────────────── */
+  /* ── glass material — luminous white clinical glass ────────────────── */
   --glass-tint:     #ffffff;
-  --glass-fill-hi:  rgba(255, 255, 255, 0.74);
-  --glass-fill-lo:  rgba(255, 255, 255, 0.40);
-  --glass-edge:     rgba(255, 255, 255, 0.70);
-  --glass-edge-dim: rgba(14, 50, 45, 0.10);
-  --glass-spec:     rgba(255, 255, 255, 0.95);
-  --glass-cast:     rgba(8, 48, 43, 0.20);
+  --glass-fill-hi:  rgba(255, 255, 255, 0.94);
+  --glass-fill-lo:  rgba(255, 255, 255, 0.78);
+  --glass-edge:     rgba(255, 255, 255, 0.98);
+  --glass-edge-dim: rgba(13, 130, 118, 0.12);
+  --glass-spec:     rgba(255, 255, 255, 1);
+  --glass-cast:     rgba(15, 60, 50, 0.08);
 
-  --blur-thin:    9px;
+  --blur-thin:    10px;
   --blur-regular: 22px;
-  --blur-thick:   40px;
+  --blur-thick:   36px;
   --blur:         var(--blur-regular);
 
-  /* ── ambient mesh — drawn from the brand mark ──────────────────────── */
-  --orb-a: #8bc53f;
-  --orb-b: #1fa07e;
-  --orb-c: #1b6ba8;
-  --orb-opacity: 0.42;
+  /* ── ambient mesh — daylight tones drawn from the brand mark ───────── */
+  --orb-a: #86efac;  /* fresh spring mint */
+  --orb-b: #5eead4;  /* clinical healing teal */
+  --orb-c: #93c5fd;  /* clear sky blue */
+  --orb-opacity: 0.28;
 
   /* ── type ──────────────────────────────────────────────────────────── */
   --font-sans: Inter, "Noto Sans Sinhala", system-ui, -apple-system,
-               BlinkMacSystemFont, "Segoe UI", sans-serif;
+               BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-data: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 
   /* ── space · radius · elevation ────────────────────────────────────── */
@@ -54,65 +58,35 @@
 
   --r-sm: 10px; --r-md: 14px; --r-lg: 18px; --r-xl: 22px; --r-pill: 999px;
 
-  --shadow-sm: 0 4px 12px -4px var(--glass-cast);
-  --shadow-md: 0 18px 44px -14px var(--glass-cast);
+  --shadow-sm: 0 2px 8px -2px var(--glass-cast), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 10px 25px -4px var(--glass-cast), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 20px 35px -6px var(--glass-cast), 0 8px 16px -4px rgba(0, 0, 0, 0.04);
 
   --shell: 1440px;
   color-scheme: light;
 }
 
-/* System default (nothing stamped) plus an explicit dark OS preference.
- * Guarded so an explicit light choice still wins. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --primary:       #3aa394;
-    --primary-lum:   #48d8c0;
-    --background:    #07100f;
-    --surface:       #0f1a18;
-    --border:        #22332f;
-    --text:          #e9f2f0;
-    --muted:         #9db2ae;
-    --faint:         #6b807c;
-    --danger:        #f2685f;
-    --warning:       #e0a44a;
-    --success:       #4bb574;
-    --emergency:     #ff4d4d;
-    --agent:         #8c8cd9;
-    --on-accent:     #06100e;
-
-    --glass-tint:     #7fe9d6;
-    --glass-fill-hi:  rgba(38, 74, 70, 0.62);
-    --glass-fill-lo:  rgba(20, 44, 41, 0.34);
-    --glass-edge:     rgba(126, 235, 214, 0.20);
-    --glass-edge-dim: rgba(0, 0, 0, 0.40);
-    --glass-spec:     rgba(160, 255, 238, 0.26);
-    --glass-cast:     rgba(0, 0, 0, 0.52);
-
-    --orb-a: #35591d;
-    --orb-b: #0e6f62;
-    --orb-c: #12506f;
-    --orb-opacity: 0.50;
-
-    color-scheme: dark;
-  }
-}
-
-/* Explicit dark choice wins over a light OS preference. */
+/* Explicit dark choice activated when [data-theme="dark"] is set. */
 :root[data-theme="dark"] {
-  --primary:       #3aa394;
-  --primary-lum:   #48d8c0;
-  --background:    #07100f;
-  --surface:       #0f1a18;
-  --border:        #22332f;
-  --text:          #e9f2f0;
-  --muted:         #9db2ae;
-  --faint:         #6b807c;
-  --danger:        #f2685f;
-  --warning:       #e0a44a;
-  --success:       #4bb574;
-  --emergency:     #ff4d4d;
-  --agent:         #8c8cd9;
-  --on-accent:     #06100e;
+  --primary:        #3aa394;
+  --primary-lum:    #48d8c0;
+  --primary-subtle: rgba(58, 163, 148, 0.16);
+  --primary-hover:  #48d8c0;
+  --background:     #07100f;
+  --surface:        #0f1a18;
+  --surface-subtle: #142421;
+  --border:         #22332f;
+  --border-subtle:  #182825;
+  --text:           #e9f2f0;
+  --text-heading:   #ffffff;
+  --muted:          #9db2ae;
+  --faint:          #6b807c;
+  --danger:         #f2685f;
+  --warning:        #e0a44a;
+  --success:        #4bb574;
+  --emergency:      #ff4d4d;
+  --agent:          #8c8cd9;
+  --on-accent:      #06100e;
 
   --glass-tint:     #7fe9d6;
   --glass-fill-hi:  rgba(38, 74, 70, 0.62);
@@ -126,6 +100,10 @@
   --orb-b: #0e6f62;
   --orb-c: #12506f;
   --orb-opacity: 0.50;
+
+  --shadow-sm: 0 4px 12px -4px var(--glass-cast);
+  --shadow-md: 0 18px 44px -14px var(--glass-cast);
+  --shadow-lg: 0 24px 50px -16px var(--glass-cast);
 
   color-scheme: dark;
 }

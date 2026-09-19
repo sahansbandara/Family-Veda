@@ -9,9 +9,9 @@
 
 .glass {
   background: linear-gradient(147deg, var(--glass-fill-hi), var(--glass-fill-lo));
-  backdrop-filter: blur(var(--blur)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
-  border: 1px solid var(--glass-edge);
+  backdrop-filter: blur(var(--blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(160%);
+  border: 1px solid var(--border);
   border-radius: var(--r-xl);
   box-shadow:
     inset 0 1px 0 0 var(--glass-spec),
@@ -21,8 +21,8 @@
 
 .glass--thin {
   --blur: var(--blur-thin);
-  --glass-fill-hi: color-mix(in srgb, var(--glass-tint) 44%, transparent);
-  --glass-fill-lo: color-mix(in srgb, var(--glass-tint) 20%, transparent);
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  border: 1px solid var(--border-subtle);
   box-shadow:
     inset 0 1px 0 0 var(--glass-spec),
     var(--shadow-sm);
@@ -30,6 +30,8 @@
 
 .glass--thick {
   --blur: var(--blur-thick);
+  background: linear-gradient(147deg, var(--glass-fill-hi), var(--surface));
+  border: 1px solid var(--border);
 }
 
 /* Opaque. Used where translucency would be a safety problem: unapproved AI

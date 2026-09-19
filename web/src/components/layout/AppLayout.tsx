@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
@@ -36,6 +37,21 @@ function initials(name: string | undefined): string {
 export function AppLayout() {
   const dispatch = useAppDispatch()
   const user = useAppSelector((state) => state.auth.user)
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('fv-theme') as 'light' | 'dark') || 'light'
+  })
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'light' ? 'dark' : 'light'
+    setTheme(nextTheme)
+    document.documentElement.setAttribute('data-theme', nextTheme)
+    localStorage.setItem('fv-theme', nextTheme)
+  }
+
   const visibleItems = navItems.filter((item) => user && item.roles.includes(user.role) &&
     (user.role !== 'DOCTOR' || user.verificationStatus === 'VERIFIED' || item.path === '/doctor-status'))
   async function signOut() {
@@ -46,7 +62,7 @@ export function AppLayout() {
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">Skip to main content</a>
-      <header className="topbar glass glass--thick">
+      <header className="topbar">
         <NavLink className="brand" to={user?.role === 'ONBOARDING' ? '/onboarding' : '/dashboard'} aria-label="Family Veda dashboard">
           <span className="brand-mark">
             <img src={markUrl} alt="" width={42} height={42} />
@@ -57,6 +73,16 @@ export function AppLayout() {
           </span>
         </NavLink>
         <div className="session-summary">
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={toggleTheme}
+            title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} theme`}
+            aria-label={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} theme`}
+          >
+            <span aria-hidden="true">{theme === 'light' ? '☀️' : '🌙'}</span>
+            <span>{theme === 'light' ? 'Light' : 'Dark'}</span>
+          </button>
           <span>
             <strong>{user?.name}</strong>
             <small>{user?.role.replaceAll('_', ' ')}</small>
