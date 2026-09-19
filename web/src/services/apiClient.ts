@@ -71,3 +71,4 @@ export type HereditaryFlagDto = { id: string; memberId: string; conditionCode: s
 export type LabReportDetailDto = LabReportDto & { values: LabValueDto[]; flags: HereditaryFlagDto[] }
 export type VitalDto = { id: string; memberId: string; vitalType: string; value: number; unit: string; measuredAt: string }
 export type VitalTrendDto = { vitalType: string; points: Array<{ measuredAt: string; value: number; unit: string }> }
+export type ApprovedGuidanceDto = { caseId: string; status: string; finalAdvisory: string; approvedAt: string; disclaimer: string }
