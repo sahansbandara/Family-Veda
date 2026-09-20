@@ -19,8 +19,17 @@ class _LabUploadScreenState extends ConsumerState<LabUploadScreen> {
   String? _message;
 
   Future<void> _pick(ImageSource source) async {
-    final file = await _picker.pickImage(source: source, imageQuality: 90);
-    if (file != null && mounted) setState(() { _file = file; _message = null; });
+    try {
+      final file = await _picker.pickImage(source: source, imageQuality: 90);
+      if (!mounted) return;
+      if (file == null) {
+        setState(() => _message = 'No image selected. Camera and photos permission is required for capture.');
+        return;
+      }
+      setState(() { _file = file; _message = null; });
+    } catch (_) {
+      if (mounted) setState(() => _message = 'Camera or photos access was denied. Enable it in Settings, or choose an image from the gallery.');
+    }
   }
 
   Future<void> _upload() async {

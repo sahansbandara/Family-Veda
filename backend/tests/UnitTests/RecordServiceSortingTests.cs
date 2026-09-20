@@ -58,6 +58,22 @@ public sealed class RecordServiceSortingTests
         trends[0].Points.Select(x => x.Value).Should().Equal(70m, 72m);
     }
 
+    [Fact]
+    public async Task GetHereditaryFlags_ReturnsOnlyManuallyConfirmedFlags()
+    {
+        var (service, memberId, db) = await SeedAsync();
+        var evidence = db.HealthRecords.First(x => x.MemberId == memberId);
+        db.HereditaryFlags.AddRange(
+            new HereditaryFlag { MemberId = memberId, HealthRecordId = evidence.Id, ConditionCode = "SYNTH-OPEN", Finding = "Unconfirmed synthetic marker", Confidence = 0.4m, ManuallyConfirmed = false },
+            new HereditaryFlag { MemberId = memberId, HealthRecordId = evidence.Id, ConditionCode = "SYNTH-CONFIRMED", Finding = "Confirmed synthetic screening marker", Confidence = 0.7m, ManuallyConfirmed = true });
+        await db.SaveChangesAsync();
+
+        var flags = await service.GetHereditaryFlagsAsync(memberId, CancellationToken.None);
+
+        flags.Should().ContainSingle(x => x.ConditionCode == "SYNTH-CONFIRMED" && x.ManuallyConfirmed);
+        flags.Should().NotContain(x => x.ConditionCode == "SYNTH-OPEN");
+    }
+
     private static async Task<(RecordService Service, Guid MemberId, AppDbContext Db)> SeedAsync()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
