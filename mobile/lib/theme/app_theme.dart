@@ -4,32 +4,45 @@
 // marks unapproved AI output, `emergency` is still reserved for the red-flag
 // path. Only the material underneath them changed.
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
 
 class AppColors {
   const AppColors._();
 
   // Light
-  static const primary = Color(0xFF0F6D63);
-  static const primaryLum = Color(0xFF17A08F);
-  static const background = Color(0xFFEDF3F2);
+  static const primary = Color(0xFF0D8276);
+  static const primaryLum = Color(0xFF14B8A6);
+  static const primarySubtle = Color(0xFFE6F7F5);
+  static const primaryHover = Color(0xFF0A6B61);
+  static const background = Color(0xFFEFF5F3);
   static const surface = Color(0xFFFFFFFF);
-  static const border = Color(0xFFC9D9D6);
-  static const text = Color(0xFF0E1E1B);
-  static const muted = Color(0xFF4A5F5B);
-  static const faint = Color(0xFF7C908C);
+  static const surfaceSubtle = Color(0xFFE7F1EE);
+  static const border = Color(0xFFCEDFDC);
+  static const borderSubtle = Color(0xFFE0EBE8);
+  static const text = Color(0xFF0E1E1C);
+  static const textHeading = Color(0xFF061A17);
+  static const muted = Color(0xFF46605A);
+  static const faint = Color(0xFF6F8984);
   static const danger = Color(0xFFB3261E);
   static const warning = Color(0xFFA66300);
-  static const success = Color(0xFF1F7A45);
+  static const success = Color(0xFF167946);
   static const emergency = Color(0xFF8B0000);
   static const agent = Color(0xFF4A4A8F);
+  static const onAccent = Color(0xFFFFFFFF);
 
   // Dark
   static const primaryDark = Color(0xFF3AA394);
   static const primaryLumDark = Color(0xFF48D8C0);
+  static const primarySubtleDark = Color(0x293AA394);
   static const backgroundDark = Color(0xFF07100F);
   static const surfaceDark = Color(0xFF0F1A18);
+  static const surfaceSubtleDark = Color(0xFF142421);
   static const borderDark = Color(0xFF22332F);
+  static const borderSubtleDark = Color(0xFF182825);
   static const textDark = Color(0xFFE9F2F0);
+  static const textHeadingDark = Color(0xFFFFFFFF);
   static const mutedDark = Color(0xFF9DB2AE);
   static const faintDark = Color(0xFF6B807C);
   static const dangerDark = Color(0xFFF2685F);
@@ -37,11 +50,12 @@ class AppColors {
   static const successDark = Color(0xFF4BB574);
   static const emergencyDark = Color(0xFFFF4D4D);
   static const agentDark = Color(0xFF8C8CD9);
+  static const onAccentDark = Color(0xFF06100E);
 
   // Ambient mesh, drawn from the brand mark.
-  static const orbA = Color(0xFF8BC53F);
-  static const orbB = Color(0xFF1FA07E);
-  static const orbC = Color(0xFF1B6BA8);
+  static const orbA = Color(0xFF86EFAC);
+  static const orbB = Color(0xFF5EEAD4);
+  static const orbC = Color(0xFF93C5FD);
 }
 
 /// Glass material tokens, resolved per brightness.
@@ -176,6 +190,7 @@ ThemeData buildAppTheme({Brightness brightness = Brightness.light}) {
   final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
   final background = isDark ? AppColors.backgroundDark : AppColors.background;
   final text = isDark ? AppColors.textDark : AppColors.text;
+  final textHeading = isDark ? AppColors.textHeadingDark : AppColors.textHeading;
   final muted = isDark ? AppColors.mutedDark : AppColors.muted;
   final border = isDark ? AppColors.borderDark : AppColors.border;
   final danger = isDark ? AppColors.dangerDark : AppColors.danger;
@@ -202,17 +217,17 @@ ThemeData buildAppTheme({Brightness brightness = Brightness.light}) {
     ],
     textTheme: TextTheme(
       displaySmall: TextStyle(
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w800,
         letterSpacing: -0.5,
         height: 1.08,
-        color: text,
+        color: textHeading,
       ),
       headlineSmall: TextStyle(
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         letterSpacing: -0.3,
-        color: text,
+        color: textHeading,
       ),
-      titleLarge: TextStyle(fontWeight: FontWeight.w600, color: text),
+      titleLarge: TextStyle(fontWeight: FontWeight.w700, color: textHeading),
       titleMedium: TextStyle(fontWeight: FontWeight.w600, color: text),
       bodyLarge: TextStyle(fontSize: 16, height: 1.55, color: text),
       bodyMedium: TextStyle(fontSize: 15, height: 1.55, color: text),

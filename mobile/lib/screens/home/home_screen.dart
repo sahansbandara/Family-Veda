@@ -29,6 +29,20 @@ class HomeScreen extends ConsumerWidget {
         title: const Text('Family Veda'),
         actions: [
           IconButton(
+            tooltip: 'Toggle theme',
+            onPressed: () {
+              final current = ref.read(themeModeProvider);
+              final isDark = current == ThemeMode.dark;
+              ref.read(themeModeProvider.notifier).state =
+                  isDark ? ThemeMode.light : ThemeMode.dark;
+            },
+            icon: Icon(
+              Theme.of(context).brightness == Brightness.dark
+                  ? Icons.light_mode_outlined
+                  : Icons.dark_mode_outlined,
+            ),
+          ),
+          IconButton(
             tooltip: 'Notifications',
             onPressed: () => context.push('/notifications'),
             icon: const Icon(Icons.notifications_outlined),
