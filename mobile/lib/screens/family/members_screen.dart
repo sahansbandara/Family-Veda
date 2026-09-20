@@ -7,6 +7,7 @@ import 'package:family_veda/widgets/shared/async_state_views.dart';
 import 'package:family_veda/widgets/shared/member_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class MembersScreen extends ConsumerWidget {
   const MembersScreen({super.key});
@@ -57,6 +58,13 @@ class MembersScreen extends ConsumerWidget {
                           ),
                         ),
                       );
+                    }
+                    if (context.mounted) {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go('/home');
+                      }
                     }
                   },
                 );
