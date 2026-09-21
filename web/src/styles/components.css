@@ -614,7 +614,7 @@
   font-size: 0.88rem;
   font-weight: 600;
 }
-.field input, .field select,
+.field input, .field select, .field textarea,
 .form-grid input, .form-grid select, .form-grid textarea,
 table input {
   width: 100%;
@@ -628,12 +628,19 @@ table input {
   font-weight: 500;
   transition: border-color 140ms ease, box-shadow 140ms ease;
 }
-.field input:hover, .field select:hover,
+.field textarea,
+.form-grid textarea {
+  min-height: 90px;
+  resize: vertical;
+  line-height: 1.5;
+  font-family: inherit;
+}
+.field input:hover, .field select:hover, .field textarea:hover,
 .form-grid input:hover, .form-grid select:hover,
 table input:hover {
   border-color: var(--primary);
 }
-.field input:focus, .field select:focus,
+.field input:focus, .field select:focus, .field textarea:focus,
 .form-grid input:focus, .form-grid select:focus, .form-grid textarea:focus,
 table input:focus {
   outline: none;
@@ -726,31 +733,48 @@ tbody tr:hover { background: var(--primary-subtle); }
 
 .agent-panel {
   color: #fff;
-  background: linear-gradient(155deg, #5a5aa8, var(--agent));
-  border: 1px solid transparent;
+  background: linear-gradient(155deg, rgba(74, 74, 143, 0.45), rgba(20, 20, 45, 0.8));
+  border: 1px solid rgba(140, 140, 217, 0.35);
   border-radius: var(--r-xl);
-  box-shadow: 0 18px 40px -16px rgba(40, 40, 100, 0.6);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  box-shadow: 0 18px 40px -16px rgba(10, 10, 30, 0.7);
+  backdrop-filter: blur(var(--blur-regular));
+  -webkit-backdrop-filter: blur(var(--blur-regular));
+  overflow: hidden;
 }
 .agent-panel h2, .agent-panel h3 { color: #fff; }
 .agent-panel .muted { color: rgba(255, 255, 255, 0.78); }
 
 .agent-copy {
-  margin-bottom: 0;
+  margin-top: var(--sp-2);
+  margin-bottom: var(--sp-4);
   padding: var(--sp-4);
-  color: #fff;
-  background: rgba(0, 0, 0, 0.22);
+  color: #e2e8f0;
+  background: rgba(10, 15, 30, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--r-md);
-  line-height: 1.55;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.88rem;
 }
 
 .approval-layout {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
-  gap: var(--sp-4);
+  grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
+  gap: var(--sp-5);
+  align-items: start;
 }
-.approval-panel { position: sticky; top: 128px; align-self: start; }
+.approval-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  position: sticky;
+  top: 128px;
+  align-self: start;
+}
 
 .detail-list { display: grid; gap: 0; margin: 0 0 var(--sp-5); }
 .detail-list div {

@@ -10,6 +10,17 @@ const approvedGuidance = [
   'Continue monitoring symptoms and seek in-person care if they worsen.',
 ] as const
 
+function prettyPrintJson(raw?: string | null): string {
+  if (!raw) return 'No content available.'
+  try {
+    const parsed = JSON.parse(raw)
+    if (typeof parsed === 'string') return parsed
+    return JSON.stringify(parsed, null, 2)
+  } catch {
+    return raw
+  }
+}
+
 export function ApprovalsPage() {
   const [cases, setCases] = useState<TriageCaseDto[]>([])
   const [selectedId, setSelectedId] = useState('')
@@ -32,6 +43,7 @@ export function ApprovalsPage() {
     } catch { setStatus('error') }
   }, [])
   useEffect(() => { void loadQueue() }, [loadQueue])
+
   const loadReview = useCallback(async () => {
     if (!selectedId) { setReview(null); setReviewStatus('idle'); return }
     setReview(null); setReviewStatus('loading'); setMessage('')
@@ -44,32 +56,196 @@ export function ApprovalsPage() {
 
   async function decide(action: 'approve' | 'revise' | 'request-info' | 'reject' | 'escalate') {
     if (!selectedId || saving) return
-    if ((action === 'approve' || action === 'revise') && !approvedGuidance.includes(advisory as (typeof approvedGuidance)[number])) { setMessage('Select approved non-diagnostic patient guidance.'); return }
+    if ((action === 'approve' || action === 'revise') && !approvedGuidance.includes(advisory as (typeof approvedGuidance)[number])) {
+      setMessage('Select approved non-diagnostic patient guidance.')
+      return
+    }
     if (!window.confirm(`Confirm ${action.replace('-', ' ')} decision? This action is audited.`)) return
     setSaving(true); setMessage('')
     try {
       await apiClient.post(`/triage-cases/${selectedId}/${action}`, { doctorNotes: notes.trim() || null, finalAdvisory: advisory.trim() || null })
       setMessage('Decision saved and patient visibility updated through approval gate.')
       setSelectedId(''); setReview(null); await loadQueue()
-    } catch { setMessage('Decision was not saved. Review access, wording, and safety validation, then retry.') }
-    finally { setSaving(false) }
+    } catch {
+      setMessage('Decision was not saved. Review access, wording, and safety validation, then retry.')
+    } finally {
+      setSaving(false)
+    }
   }
 
-  return <div className="page-stack">
-    <header className="page-header"><div><p className="eyebrow">Clinical review gate</p><h1>Approvals</h1><p>Structured AI output remains doctor-only until an authorized decision is saved.</p></div></header>
-    {status === 'loading' ? <LoadingState label="Loading approval queue" /> : status === 'error' ? <ErrorState message="Approval queue could not be loaded." onRetry={() => void loadQueue()} /> : cases.length === 0 ? <EmptyState title="No cases awaiting approval" message="Cases appear here only with an active grant and pending doctor review." /> : <>
-      <label>Case<select value={selectedId} onChange={(event) => setSelectedId(event.target.value)}>{cases.map((item) => <option key={item.id} value={item.id}>{item.id} · {item.priority}</option>)}</select></label>
-      {reviewStatus === 'error' ? <ErrorState message="Case evidence could not be loaded." onRetry={() => void loadReview()} /> : reviewStatus !== 'ready' || !review ? <LoadingState label="Loading case evidence" /> : <section className="approval-layout">
-        <article className="panel agent-panel"><div className="panel-heading"><div><p className="eyebrow">Unapproved structured output</p><h2>{review.id}</h2></div><StatusBadge status="DRAFT" /></div>
-          <dl className="detail-list"><div><dt>Priority</dt><dd>{review.priority}</dd></div><div><dt>Status</dt><dd>{review.status}</dd></div><div><dt>Trace steps</dt><dd>{review.traces.length}</dd></div></dl>
-          <h3>Analysis</h3><pre className="agent-copy">{review.analysisJson ?? 'No analysis output.'}</pre><h3>Familial screening signal</h3><pre className="agent-copy">{review.familialRiskJson ?? 'No consented familial signal.'}</pre>
-          <h3>Agent traces</h3><div className="table-scroll"><table><thead><tr><th>Step</th><th>Agent</th><th>Tools allowed</th><th>Denied</th><th>Confidence</th></tr></thead><tbody>{review.traces.map((trace) => <tr key={`${trace.stepNumber}-${trace.agent}`}><td>{trace.stepNumber}</td><td>{trace.agent}</td><td>{trace.toolsAllowed.join(', ') || 'None'}</td><td>{trace.toolsDenied.join(', ') || 'None'}</td><td>{trace.confidence.toFixed(2)}</td></tr>)}</tbody></table></div>
-        </article>
-        <aside className="panel approval-panel" aria-labelledby="decision-heading"><p className="eyebrow">Doctor decision</p><h2 id="decision-heading">Review actions</h2>
-          <label>Final patient guidance<select value={advisory} onChange={(event) => setAdvisory(event.target.value)}><option value="">Select approved guidance</option>{approvedGuidance.map((guidance) => <option key={guidance} value={guidance}>{guidance}</option>)}</select></label><label>Internal notes<textarea rows={4} value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={1000} /></label>
-          {message && <p role="status">{message}</p>}<div className="button-stack"><button type="button" className="button button--primary" disabled={saving} onClick={() => void decide('approve')}>Approve</button><button type="button" className="button button--secondary" disabled={saving} onClick={() => void decide('revise')}>Revise and approve</button><button type="button" className="button button--secondary" disabled={saving} onClick={() => void decide('request-info')}>Request information</button><button type="button" className="button button--danger" disabled={saving} onClick={() => void decide('reject')}>Reject</button><button type="button" className="button button--danger" disabled={saving} onClick={() => void decide('escalate')}>Escalate</button></div>
-        </aside>
-      </section>}
-    </>}
-  </div>
+  return (
+    <div className="page-stack">
+      <header className="page-header">
+        <div>
+          <p className="eyebrow">Clinical review gate</p>
+          <h1>Approvals</h1>
+          <p>Structured AI output remains doctor-only until an authorized decision is saved.</p>
+        </div>
+      </header>
+
+      {status === 'loading' ? (
+        <LoadingState label="Loading approval queue" />
+      ) : status === 'error' ? (
+        <ErrorState message="Approval queue could not be loaded." onRetry={() => void loadQueue()} />
+      ) : cases.length === 0 ? (
+        <EmptyState title="No cases awaiting approval" message="Cases appear here only with an active grant and pending doctor review." />
+      ) : (
+        <>
+          <div className="panel" style={{ padding: 'var(--sp-4)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-4)', flexWrap: 'wrap' }}>
+              <label className="field" style={{ flex: '1 1 320px' }}>
+                <span>Select Case from Queue</span>
+                <select value={selectedId} onChange={(event) => setSelectedId(event.target.value)}>
+                  {cases.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.id} · Priority: {item.priority} · Status: {item.status}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', paddingTop: '20px' }}>
+                <span className="eyebrow" style={{ margin: 0 }}>
+                  {cases.length} Case{cases.length === 1 ? '' : 's'} In Review Queue
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {reviewStatus === 'error' ? (
+            <ErrorState message="Case evidence could not be loaded." onRetry={() => void loadReview()} />
+          ) : reviewStatus !== 'ready' || !review ? (
+            <LoadingState label="Loading case evidence" />
+          ) : (
+            <section className="approval-layout">
+              <article className="panel agent-panel">
+                <div className="panel-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--sp-3)', marginBottom: 'var(--sp-4)' }}>
+                  <div>
+                    <p className="eyebrow" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>Unapproved Structured Output</p>
+                    <h2 style={{ fontSize: '1.25rem', wordBreak: 'break-all', margin: '4px 0 0' }}>{review.id}</h2>
+                  </div>
+                  <StatusBadge status="DRAFT" />
+                </div>
+
+                <dl className="detail-list">
+                  <div>
+                    <dt style={{ color: 'rgba(255, 255, 255, 0.75)' }}>Priority</dt>
+                    <dd><strong>{review.priority}</strong></dd>
+                  </div>
+                  <div>
+                    <dt style={{ color: 'rgba(255, 255, 255, 0.75)' }}>Status</dt>
+                    <dd>{review.status}</dd>
+                  </div>
+                  <div>
+                    <dt style={{ color: 'rgba(255, 255, 255, 0.75)' }}>Trace Steps</dt>
+                    <dd>{review.traces.length} steps executed</dd>
+                  </div>
+                </dl>
+
+                <h3 style={{ marginTop: 'var(--sp-4)' }}>Analysis</h3>
+                <pre className="agent-copy">{prettyPrintJson(review.analysisJson)}</pre>
+
+                <h3>Familial Screening Signal</h3>
+                <pre className="agent-copy">{prettyPrintJson(review.familialRiskJson)}</pre>
+
+                {review.draftAdvisoryJson && (
+                  <>
+                    <h3>Draft Advisory</h3>
+                    <pre className="agent-copy">{prettyPrintJson(review.draftAdvisoryJson)}</pre>
+                  </>
+                )}
+
+                <h3 style={{ marginTop: 'var(--sp-4)' }}>Agent Traces</h3>
+                <div className="table-scroll" style={{ background: 'rgba(0, 0, 0, 0.25)', borderRadius: 'var(--r-md)', padding: 'var(--sp-2)' }}>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th style={{ color: 'rgba(255, 255, 255, 0.85)' }}>Step</th>
+                        <th style={{ color: 'rgba(255, 255, 255, 0.85)' }}>Agent</th>
+                        <th style={{ color: 'rgba(255, 255, 255, 0.85)' }}>Tools Allowed</th>
+                        <th style={{ color: 'rgba(255, 255, 255, 0.85)' }}>Denied</th>
+                        <th style={{ color: 'rgba(255, 255, 255, 0.85)' }}>Confidence</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {review.traces.map((trace) => (
+                        <tr key={`${trace.stepNumber}-${trace.agent}`}>
+                          <td>{trace.stepNumber}</td>
+                          <td><strong>{trace.agent}</strong></td>
+                          <td>{trace.toolsAllowed.join(', ') || 'None'}</td>
+                          <td>{trace.toolsDenied.join(', ') || 'None'}</td>
+                          <td>{(trace.confidence * 100).toFixed(0)}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+
+              <aside className="panel approval-panel" aria-labelledby="decision-heading">
+                <div>
+                  <p className="eyebrow">Doctor Decision Gate</p>
+                  <h2 id="decision-heading" style={{ margin: '4px 0 0' }}>Review Actions</h2>
+                </div>
+
+                <label className="field">
+                  <span>Final Patient Guidance</span>
+                  <select value={advisory} onChange={(event) => setAdvisory(event.target.value)}>
+                    <option value="">Select approved guidance</option>
+                    {approvedGuidance.map((guidance) => (
+                      <option key={guidance} value={guidance}>{guidance}</option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="field">
+                  <span>Internal Clinical Notes</span>
+                  <textarea
+                    rows={4}
+                    value={notes}
+                    onChange={(event) => setNotes(event.target.value)}
+                    maxLength={1000}
+                    placeholder="Enter clinical rationale or review notes..."
+                  />
+                </label>
+
+                {message && (
+                  <p
+                    role="status"
+                    style={{
+                      padding: 'var(--sp-2) var(--sp-3)',
+                      borderRadius: 'var(--r-md)',
+                      background: 'var(--surface-sunken)',
+                      fontSize: '0.85rem',
+                      lineHeight: 1.4,
+                      border: '1px solid var(--border)',
+                    }}
+                  >
+                    {message}
+                  </p>
+                )}
+
+                <div className="button-stack">
+                  <button type="button" className="button button--primary" disabled={saving} onClick={() => void decide('approve')}>
+                    Approve
+                  </button>
+                  <button type="button" className="button button--secondary" disabled={saving} onClick={() => void decide('revise')}>
+                    Revise and Approve
+                  </button>
+                  <button type="button" className="button button--secondary" disabled={saving} onClick={() => void decide('request-info')}>
+                    Request Information
+                  </button>
+                  <button type="button" className="button button--danger" disabled={saving} onClick={() => void decide('reject')}>
+                    Reject
+                  </button>
+                  <button type="button" className="button button--danger" disabled={saving} onClick={() => void decide('escalate')}>
+                    Escalate
+                  </button>
+                </div>
+              </aside>
+            </section>
+          )}
+        </>
+      )}
+    </div>
+  )
 }

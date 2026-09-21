@@ -55,6 +55,7 @@ export type MemberDto = { id: string; familyId: string; displayName: string; dat
 export type FamilyDto = { id: string; name: string; members: MemberDto[] }
 export type PagedResult<T> = { items: T[]; page: number; pageSize: number; totalCount: number; totalPages: number }
 export type HealthRecordDto = { id: string; memberId: string; recordType: string; title: string; summary?: string; occurredOn: string }
+export type EpisodeDto = { id: string; memberId: string; symptoms: string[]; durationDays: number; severity: number; notes?: string; createdAt: string }
 export type TriageCaseDto = { id: string; episodeId: string; memberId: string; status: string; priority: string; createdAt: string }
 export type AvailableCaseDto = { id: string; priority: string; createdAt: string }
 export type AuditDto = { id: string; eventType: string; resourceType: string; resourceId?: string; outcome: string; createdAt: string }
