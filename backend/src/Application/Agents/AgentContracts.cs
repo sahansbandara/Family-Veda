@@ -1,3 +1,5 @@
+// ⚠ SHARED — coordinated by S3. Add lines inside your own labelled block;
+// never reorder or reformat existing lines. See agent/MEMORY.md:63.
 using FamilyVeda.Domain.Common;
 
 namespace FamilyVeda.Application.Agents;
