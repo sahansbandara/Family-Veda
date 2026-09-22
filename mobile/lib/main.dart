@@ -63,7 +63,7 @@ class _FamilyVedaAppState extends ConsumerState<FamilyVedaApp> {
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
       darkTheme: buildAppTheme(brightness: Brightness.dark),
-      themeMode: ThemeMode.system,
+      themeMode: ref.watch(themeModeProvider),
       // The ambient colour field every glass surface blurs. Wrapping here
       // means each screen gets it without repeating itself.
       builder: (context, child) =>
