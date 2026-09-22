@@ -1,6 +1,6 @@
 # Per-member full-stack evidence table
 
-**Generated** 2026-09-22 from [`docs/OWNERSHIP.tsv`](../OWNERSHIP.tsv) at `ed90cf3`. Regenerate after any ownership change — do not hand-edit.
+**Generated** 2026-09-22 from [`docs/OWNERSHIP.tsv`](../OWNERSHIP.tsv) at `05b0605`. Regenerate after any ownership change — do not hand-edit.
 
 Closes the `agent/TODO.md` H7 item *"Per-member full-stack evidence table"*.
 
@@ -21,9 +21,9 @@ Closes the `agent/TODO.md` H7 item *"Per-member full-stack evidence table"*.
 
 | Member | GitHub | Component | Agent(s) | Branch | Files |
 |---|---|---|---|---|---|
-| **S1** · IT23544154 | `@IT23544154` | Samaranayaka S.G.V.S — Family, Identity & Consent | —  (owns the enforcement layer every agent depends on) | `feature/s1-consent-management` | 79 |
-| **S2** · IT24101875 | `@it24101875` | Fernando K.R.N — Health Records & Extraction | Extraction Agent | `feature/s2-lab-ocr-extraction` | 20 |
-| **S3** · IT24100551 | `@Jani6969` | Karunathilaka K.D.J.C — Triage & Agent Orchestration | Coordinator · Context · Analysis Agents | `feature/s3-agent-orchestration` | 57 |
+| **S1** · IT23544154 | `@IT23544154` | Samaranayaka S.G.V.S — Family, Identity & Consent | —  (owns the enforcement layer every agent depends on) | `feature/s1-consent-management` | 85 |
+| **S2** · IT24101875 | `@it24101875` | Fernando K.R.N — Health Records & Extraction | Extraction Agent | `feature/s2-lab-ocr-extraction` | 22 |
+| **S3** · IT24100551 | `@Jani6969` | Karunathilaka K.D.J.C — Triage & Agent Orchestration | Coordinator · Context · Analysis Agents | `feature/s3-agent-orchestration` | 59 |
 | **S4** · IT24100559 | `@sahansbandara` | W.M.S.S.B. Wasala — Familial Risk & Clinical Approval | Familial Risk · Safety/Validation Agents | `feature/s4-approval-gate` | 33 |
 
 ## Full-stack coverage matrix
@@ -34,12 +34,12 @@ File counts per member per rubric layer. Every member owns code in the API, the 
 |---|---|---|---|---|
 | ASP.NET Core REST API (10) | 11 | 1 | 3 | 1 |
 | Application + Domain layer | 12 | 2 | 3 | 6 |
-| Infrastructure + PostgreSQL (10) | 10 | 5 | 11 | 3 |
-| React web application (10) | 14 | 1 | 13 | 8 |
+| Infrastructure + PostgreSQL (10) | 10 | 5 | 12 | 3 |
+| React web application (10) | 14 | 2 | 13 | 8 |
 | Flutter mobile application (10) | 17 | 7 | 17 | 5 |
-| Testing, CI, Git workflow (8) | 15 | 4 | 10 | 10 |
-| Agentic AI contribution (12) | 2 | 1 | 5 | 5 |
-| **Total owned files** | 79 | 20 | 57 | 33 |
+| Testing, CI, Git workflow (8) | 16 | 5 | 11 | 10 |
+| Agentic AI contribution (12) | 2 | 1 | 6 | 5 |
+| **Total owned files** | 85 | 22 | 59 | 33 |
 
 ## Database tables owned
 
@@ -162,6 +162,7 @@ Schema changes follow the **migration lock** protocol in `CLAUDE.md`: announce, 
 - `mobile/test/providers/active_member_provider_test.dart`
 - `mobile/test/providers/auth_provider_test.dart`
 - `mobile/test/router/route_guard_test.dart`
+- `mobile/test/screens/login_screen_test.dart`
 - `mobile/test/services/api_services_test.dart`
 - `mobile/test/services/secure_storage_test.dart`
 
@@ -209,6 +210,7 @@ Schema changes follow the **migration lock** protocol in `CLAUDE.md`: announce, 
 
 ### React web
 
+- `web/src/pages/records/RecordsPage.test.tsx`
 - `web/src/pages/records/RecordsPage.tsx`
 
 ### Flutter mobile
@@ -220,6 +222,10 @@ Schema changes follow the **migration lock** protocol in `CLAUDE.md`: announce, 
 - `mobile/lib/screens/records/records_screen.dart`
 - `mobile/lib/screens/records/vital_entry_screen.dart`
 - `mobile/lib/services/api/mobile_api.dart`
+
+### Flutter tests
+
+- `mobile/test/screens/records_screen_test.dart`
 
 ---
 
@@ -252,6 +258,7 @@ Schema changes follow the **migration lock** protocol in `CLAUDE.md`: announce, 
 - `backend/src/Infrastructure/Agents/AnalysisAgent.cs`
 - `backend/src/Infrastructure/Agents/ChatCompletionsLlmClient.cs`
 - `backend/src/Infrastructure/Agents/ContextAgent.cs`
+- `backend/src/Infrastructure/Agents/GeminiClient.cs`
 - `backend/src/Infrastructure/Agents/OllamaClient.cs`
 - `backend/src/Infrastructure/Persistence/Configurations/TriageConfigurations.cs`
 - `backend/src/Infrastructure/Triage/CaseSlaProcessor.cs`
@@ -312,6 +319,7 @@ Schema changes follow the **migration lock** protocol in `CLAUDE.md`: announce, 
 - `mobile/test/providers/patient_providers_test.dart`
 - `mobile/test/screens/async_state_views_test.dart`
 - `mobile/test/screens/case_status_screen_test.dart`
+- `mobile/test/screens/home_screen_test.dart`
 
 ---
 

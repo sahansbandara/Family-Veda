@@ -32,6 +32,12 @@ S1	backend/src/Application/Auth/AuthContracts.cs
 S1	backend/src/Application/Common/ICurrentUser.cs
 S1	backend/src/Application/Common/PagedResult.cs
 S1	backend/src/Application/Families/FamilyContracts.cs
+S1	.env.example
+S1	web/index.html
+S1	web/package-lock.json
+S1	mobile/analysis_options.yaml
+S1	mobile/android/gradle.properties
+S1	mobile/test/screens/login_screen_test.dart
 S1	backend/src/Application/Validation/RequestValidators.cs
 S1	backend/src/Application/FamilyVeda.Application.csproj
 S1	backend/src/Application/Agents/ToolRegistry.cs
@@ -119,6 +125,8 @@ S2	mobile/lib/screens/records/record_entry_screen.dart
 S2	mobile/lib/screens/records/lab_upload_screen.dart
 S2	mobile/lib/screens/records/vital_entry_screen.dart
 S2	mobile/lib/services/api/mobile_api.dart
+S2	web/src/pages/records/RecordsPage.test.tsx
+S2	mobile/test/screens/records_screen_test.dart
 
 # ── S3 · IT24100551 · Karunathilaka K.D.J.C (Group Leader) · Triage & Orchestration ──
 # notifications · Coordinator + Context + Analysis Agents
@@ -132,6 +140,8 @@ S3	backend/src/Infrastructure/Agents/ContextAgent.cs
 S3	backend/src/Infrastructure/Agents/AnalysisAgent.cs
 S3	backend/src/Infrastructure/Agents/OllamaClient.cs
 S3	backend/src/Infrastructure/Agents/ChatCompletionsLlmClient.cs
+S3	backend/src/Infrastructure/Agents/GeminiClient.cs
+S3	mobile/test/screens/home_screen_test.dart
 S3	backend/src/Infrastructure/Triage/TriageOrchestrator.cs
 S3	backend/src/Infrastructure/Triage/TriageService.cs
 S3	backend/src/Infrastructure/Triage/TriageWorkQueue.cs
