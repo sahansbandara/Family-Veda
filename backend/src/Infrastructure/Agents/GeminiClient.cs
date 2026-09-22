@@ -64,8 +64,16 @@ public sealed class GeminiClient(HttpClient httpClient, IOptions<GeminiOptions> 
                     }
                 };
 
-                var endpoint = $"v1beta/models/{_options.Model}:generateContent?key={_options.ApiKey}";
-                using var response = await httpClient.PostAsJsonAsync(endpoint, payload, JsonOptions, timeout.Token);
+                // The API key travels in the x-goog-api-key header, never in the query
+                // string: a URL reaches proxy logs, server access logs and the Message
+                // of any HttpRequestException raised for this request.
+                var endpoint = $"v1beta/models/{_options.Model}:generateContent";
+                using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
+                {
+                    Content = JsonContent.Create(payload, options: JsonOptions)
+                };
+                request.Headers.Add("x-goog-api-key", _options.ApiKey);
+                using var response = await httpClient.SendAsync(request, timeout.Token);
                 response.EnsureSuccessStatusCode();
 
                 var rawJson = await response.Content.ReadAsStringAsync(timeout.Token);
@@ -145,10 +153,14 @@ public sealed class GeminiClient(HttpClient httpClient, IOptions<GeminiOptions> 
             catch (Exception exception)
             {
                 lastError = exception;
-                Console.WriteLine($"[GeminiClient Attempt {attempt + 1} Error]: {exception.Message}");
+                // Only the exception type is printed. Framework exception messages can
+                // carry the full request URI and any credential inside it.
+                Console.WriteLine($"[GeminiClient Attempt {attempt + 1} Error]: {exception.GetType().Name}");
             }
         }
 
-        throw new InvalidOperationException($"Gemini failed after retry: {lastError?.Message}", lastError);
+        // The inner exception is preserved for structured logging, but it is kept out
+        // of the message string, which can reach an outward-facing error response.
+        throw new InvalidOperationException("Gemini failed after retry.", lastError);
     }
 }
