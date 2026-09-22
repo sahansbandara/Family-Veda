@@ -40,7 +40,13 @@ export function AppLayout() {
   const dispatch = useAppDispatch()
   const user = useAppSelector((state) => state.auth.user)
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    return (localStorage.getItem('fv-theme') as 'light' | 'dark') || 'light'
+    // localStorage is absent under jsdom in the test environment, and can throw
+    // when site data is blocked. Never let theme persistence break rendering.
+    try {
+      return (globalThis.localStorage?.getItem('fv-theme') as 'light' | 'dark') || 'light'
+    } catch {
+      return 'light'
+    }
   })
 
   useEffect(() => {
@@ -51,7 +57,11 @@ export function AppLayout() {
     const nextTheme = theme === 'light' ? 'dark' : 'light'
     setTheme(nextTheme)
     document.documentElement.setAttribute('data-theme', nextTheme)
-    localStorage.setItem('fv-theme', nextTheme)
+    try {
+      globalThis.localStorage?.setItem('fv-theme', nextTheme)
+    } catch {
+      // persistence is a convenience; ignore a blocked or unavailable store
+    }
   }
 
   const visibleItems = navItems.filter((item) => user && item.roles.includes(user.role) &&
