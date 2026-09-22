@@ -1,3 +1,5 @@
+// ⚠ SHARED — coordinated by S3. Add lines inside your own labelled block;
+// never reorder or reformat existing lines. See agent/MEMORY.md:63.
 import { configureStore } from '@reduxjs/toolkit'
 
 import authReducer from './slices/authSlice'

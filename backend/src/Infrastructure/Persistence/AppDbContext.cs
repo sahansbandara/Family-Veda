@@ -1,3 +1,5 @@
+// ⚠ SHARED — coordinated by S1. Add lines inside your own labelled block;
+// never reorder or reformat existing lines. See agent/MEMORY.md:63.
 using FamilyVeda.Domain.Clinical;
 using FamilyVeda.Domain.Identity;
 using FamilyVeda.Domain.Records;
