@@ -4,6 +4,7 @@ class Member {
     required this.id,
     required this.displayName,
     required this.relationshipLabel,
+    this.dateOfBirth,
   });
 
   factory Member.fromJson(Map<String, dynamic> json) => Member(
@@ -12,9 +13,11 @@ class Member {
     relationshipLabel:
         (json['relationshipLabel'] ?? json['relationship'] ?? json['role'] ?? 'Member')
             as String,
+    dateOfBirth: (json['dateOfBirth'] ?? json['dob']) as String?,
   );
 
   final String id;
   final String displayName;
   final String relationshipLabel;
+  final String? dateOfBirth;
 }

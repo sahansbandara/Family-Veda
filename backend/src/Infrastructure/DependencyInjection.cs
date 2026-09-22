@@ -41,19 +41,18 @@ public static class DependencyInjection
         services.AddScoped<IClinicalService, ClinicalService>();
         services.AddSingleton<ITriageWorkQueue, TriageWorkQueue>();
         services.AddSingleton<SafetyValidationService>();
-        services.Configure<OllamaOptions>(configuration.GetSection(OllamaOptions.SectionName));
-        services.Configure<LlmOptions>(configuration.GetSection(LlmOptions.SectionName));
-        var llmProvider = configuration[$"{LlmOptions.SectionName}:Provider"] ?? "ollama";
-        if (string.Equals(llmProvider, LlmOptions.OpenAiCompatible, StringComparison.OrdinalIgnoreCase))
+        var geminiKey = configuration["Gemini:ApiKey"];
+        if (!string.IsNullOrWhiteSpace(geminiKey))
         {
-            services.AddHttpClient<IOllamaClient, ChatCompletionsLlmClient>((provider, client) =>
+            services.Configure<GeminiOptions>(configuration.GetSection(GeminiOptions.SectionName));
+            services.AddHttpClient<IOllamaClient, GeminiClient>(client =>
             {
-                var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<LlmOptions>>().Value;
-                client.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
+                client.BaseAddress = new Uri("https://generativelanguage.googleapis.com/");
             });
         }
         else
         {
+            services.Configure<OllamaOptions>(configuration.GetSection(OllamaOptions.SectionName));
             services.AddHttpClient<IOllamaClient, OllamaClient>((provider, client) =>
             {
                 var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<OllamaOptions>>().Value;

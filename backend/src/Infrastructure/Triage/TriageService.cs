@@ -175,9 +175,13 @@ public sealed class TriageService(
     private async Task<TriageCase> RequireCaseAccessAsync(Guid caseId, bool tracesOnly, CancellationToken cancellationToken)
     {
         var triageCase = await dbContext.TriageCases.AsNoTracking().SingleOrDefaultAsync(x => x.Id == caseId, cancellationToken) ?? throw new NotFoundException();
-        if (currentUser.UserType == UserType.FamilyUser && !tracesOnly)
+        if (currentUser.UserType == UserType.FamilyUser)
         {
             await RequirePatientAccessAsync(triageCase.MemberId, cancellationToken);
+            if (tracesOnly)
+            {
+                await WriteReadAuditAsync(triageCase.MemberId, caseId, "FAMILY_TRACE_READ", null, cancellationToken);
+            }
             return triageCase;
         }
 
