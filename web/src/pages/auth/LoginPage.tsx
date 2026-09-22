@@ -78,7 +78,13 @@ export function LoginPage() {
   const [error, setError] = useState('')
   const [activeRole, setActiveRole] = useState<string | null>(null)
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    return (localStorage.getItem('fv-theme') as 'light' | 'dark') || 'light'
+    // localStorage is absent under jsdom in the test environment, and can throw
+    // when site data is blocked. Never let theme persistence break rendering.
+    try {
+      return (globalThis.localStorage?.getItem('fv-theme') as 'light' | 'dark') || 'light'
+    } catch {
+      return 'light'
+    }
   })
 
   useEffect(() => {
@@ -88,7 +94,11 @@ export function LoginPage() {
   const setAppTheme = (nextTheme: 'light' | 'dark') => {
     setTheme(nextTheme)
     document.documentElement.setAttribute('data-theme', nextTheme)
-    localStorage.setItem('fv-theme', nextTheme)
+    try {
+      globalThis.localStorage?.setItem('fv-theme', nextTheme)
+    } catch {
+      // persistence is a convenience; ignore a blocked or unavailable store
+    }
   }
 
   const fillCredentials = (demo: DemoCredential) => {
