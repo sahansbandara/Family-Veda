@@ -7,7 +7,7 @@ let tokens: Tokens | null = null
 let refreshPromise: Promise<Tokens> | null = null
 const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000/api/v1'
 
-export const apiClient = axios.create({ baseURL, timeout: 60_000 })
+export const apiClient = axios.create({ baseURL, timeout: 15_000 })
 
 export function setSessionTokens(next: Tokens | null) {
   tokens = next
@@ -21,7 +21,6 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 apiClient.interceptors.response.use(undefined, async (error: AxiosError) => {
   const original = error.config as (InternalAxiosRequestConfig & { _retried?: boolean }) | undefined
   if (error.response?.status !== 401 || !original || original._retried || !tokens?.refreshToken) throw error
-  if (original.url?.startsWith('/auth/')) throw error
 
   original._retried = true
   refreshPromise ??= axios.post<AuthResponse>(`${baseURL}/auth/refresh`, { refreshToken: tokens.refreshToken })
@@ -58,6 +57,7 @@ export type MemberDto = { id: string; familyId: string; displayName: string; dat
 export type FamilyDto = { id: string; name: string; members: MemberDto[] }
 export type PagedResult<T> = { items: T[]; page: number; pageSize: number; totalCount: number; totalPages: number }
 export type HealthRecordDto = { id: string; memberId: string; recordType: string; title: string; summary?: string; occurredOn: string }
+export type EpisodeDto = { id: string; memberId: string; symptoms: string[]; durationDays: number; severity: number; notes?: string; createdAt: string }
 export type TriageCaseDto = { id: string; episodeId: string; memberId: string; status: string; priority: string; createdAt: string }
 export type AvailableCaseDto = { id: string; priority: string; createdAt: string }
 export type AuditDto = { id: string; eventType: string; resourceType: string; resourceId?: string; outcome: string; createdAt: string }
@@ -74,3 +74,4 @@ export type HereditaryFlagDto = { id: string; memberId: string; conditionCode: s
 export type LabReportDetailDto = LabReportDto & { values: LabValueDto[]; flags: HereditaryFlagDto[] }
 export type VitalDto = { id: string; memberId: string; vitalType: string; value: number; unit: string; measuredAt: string }
 export type VitalTrendDto = { vitalType: string; points: Array<{ measuredAt: string; value: number; unit: string }> }
+export type ApprovedGuidanceDto = { caseId: string; status: string; finalAdvisory: string; approvedAt: string; disclaimer: string }
