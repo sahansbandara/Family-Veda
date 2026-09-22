@@ -53,8 +53,24 @@ public static class DatabaseInitializer
             new Relationship { Member = minorMember, RelatedMember = headMember, RelationshipType = "parent", IsBiological = true },
             new Relationship { Member = headMember, RelatedMember = secondMinorMember, RelationshipType = "guardian", IsBiological = true },
             new Relationship { Member = secondMinorMember, RelatedMember = headMember, RelationshipType = "parent", IsBiological = true });
-        dbContext.HealthRecords.Add(new HealthRecord { Member = headMember, RecordType = RecordType.Note, Title = "Synthetic baseline note", Summary = "Demonstration data only.", OccurredOn = new DateOnly(2026, 7, 1) });
-        dbContext.Vitals.Add(new Vital { Member = headMember, VitalType = "synthetic_metric", Value = 1m, Unit = "demo", MeasuredAt = DateTimeOffset.UtcNow.AddDays(-7) });
+        // ===== S2 — Health Records & Extraction =====
+        var baselineNote = new HealthRecord { Member = headMember, RecordType = RecordType.Note, Title = "Synthetic baseline note", Summary = "Demonstration data only.", OccurredOn = new DateOnly(2026, 1, 15) };
+        var laterNote = new HealthRecord { Member = headMember, RecordType = RecordType.Note, Title = "Synthetic follow-up note", Summary = "Later demonstration row for newest/oldest sort.", OccurredOn = new DateOnly(2026, 7, 1) };
+        dbContext.HealthRecords.AddRange(baselineNote, laterNote);
+        dbContext.Vitals.AddRange(
+            new Vital { Member = headMember, VitalType = "synthetic_metric", Value = 1m, Unit = "demo", MeasuredAt = DateTimeOffset.UtcNow.AddDays(-14) },
+            new Vital { Member = headMember, VitalType = "synthetic_metric", Value = 1.2m, Unit = "demo", MeasuredAt = DateTimeOffset.UtcNow.AddDays(-7) },
+            new Vital { Member = headMember, VitalType = "synthetic_metric", Value = 1.1m, Unit = "demo", MeasuredAt = DateTimeOffset.UtcNow.AddDays(-1) });
+        dbContext.HereditaryFlags.Add(new HereditaryFlag
+        {
+            Member = headMember,
+            HealthRecord = laterNote,
+            ConditionCode = "SYNTH-DEMO",
+            Finding = "Explicit synthetic screening marker",
+            Confidence = 0.6m,
+            ManuallyConfirmed = false
+        });
+        // ===== end S2 =====
         string Hash(string value) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
         var verifiedDoctor = new Doctor { User = doctorUser, RegistrationNumberHash = Hash("SYNTHETIC-VERIFIED"), RegistrationNumberLastFour = "DEMO", VerificationStatus = VerificationStatus.Verified, Specialty = "Synthetic demonstration" };
         var pendingDoctor = new Doctor { User = pendingUser, RegistrationNumberHash = Hash("SYNTHETIC-PENDING"), RegistrationNumberLastFour = "TEST", VerificationStatus = VerificationStatus.Pending, Specialty = "Synthetic demonstration" };

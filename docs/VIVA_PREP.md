@@ -42,10 +42,13 @@ Each member must be able to do all four for their **own** component, live:
 - Explain why S1 owns no agent and why the tool-permission layer is an agentic contribution.
 
 ### S2 — Health Records & Extraction
-- Show the camera capture on a physical device, end to end.
-- Show the OCR failure path: `ocr_status = FAILED`, no guessed values, manual entry offered.
-- Explain the Extraction Agent's scope and why raw content never leaves Stage 1.
-- Show a `hereditary_flags` row and trace it through either `lab_report_id` or `health_record_id`.
+
+- Show the camera capture on a physical device, end to end: `LabUploadScreen` → `POST /members/{id}/lab-reports` → `POST /lab-reports/{id}/extract`.
+- Show the OCR failure path: `ocr_status = FAILED`, `OCR_FAILED`, no guessed values, copy offers manual entry (`LabExtractionService` catch path).
+- Explain the Extraction Agent's scope: four allow-listed tools only (`read_member_profile`, `read_raw_record` metadata, `ocr_extract`, `write_lab_extraction`). Model name is `deterministic-tesseract`. It is not in `TriageOrchestrator`.
+- Show a `hereditary_flags` row and the evidence link (`lab_report_id` **or** `health_record_id`). Unconfirmed flags are hidden from `GET hereditary-flags` and from S4.
+- Memory hook: **FLAGS CROSS, FILES DON'T.** OCR text is untrusted input.
+- Demo data: synthetic seed now includes two dated notes (sort), three `synthetic_metric` points (trend), and an unconfirmed `SYNTH-DEMO` flag.
 
 ### S3 — Triage & Orchestration
 - Walk the state machine from `SUBMITTED` to `CLOSED`, naming every transition trigger.

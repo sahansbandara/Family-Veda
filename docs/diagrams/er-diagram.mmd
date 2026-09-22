@@ -1,0 +1,152 @@
+%% [S2] ER diagram regenerated from AppDbContext + RecordConfigurations (2026-09-20).
+%% Export to SVG for the consolidated report. Synthetic schema only.
+
+erDiagram
+    users ||--o{ families : creates
+    users ||--o{ members : "may link"
+    families ||--|{ members : contains
+    members ||--o{ relationships : "from"
+    members ||--o{ consents : has
+    families ||--o{ family_invitations : issues
+
+    members ||--o{ health_records : "S2"
+    members ||--o{ lab_reports : "S2"
+    members ||--o{ vitals : "S2"
+    members ||--o{ hereditary_flags : "S2"
+    lab_reports ||--o| lab_report_files : stores
+    lab_reports ||--o{ lab_values : contains
+    lab_reports ||--o{ hereditary_flags : "evidence"
+    health_records ||--o{ hereditary_flags : "evidence"
+
+    members ||--o{ episodes : "S3"
+    episodes ||--o| triage_cases : opens
+    triage_cases ||--o{ agent_traces : records
+    users ||--o{ notification_subscriptions : "S3"
+
+    users ||--o| doctors : "S4"
+    doctors ||--o{ doctor_verification_logs : "S4"
+    families ||--o{ family_doctor_assignments : "S4"
+    triage_cases ||--o{ case_access_grants : "S4"
+    triage_cases ||--o{ approvals : "S4"
+    members ||--o{ audit_logs : "S4"
+
+    users {
+        uuid id PK
+        varchar email
+        varchar user_type
+    }
+    families {
+        uuid id PK
+        varchar name
+        uuid created_by_user_id FK
+    }
+    members {
+        uuid id PK
+        uuid family_id FK
+        uuid user_id FK
+        date date_of_birth
+        varchar role
+    }
+    consents {
+        uuid id PK
+        uuid member_id FK
+        varchar category
+        varchar status
+    }
+    relationships {
+        uuid id PK
+        uuid member_id FK
+        uuid related_member_id FK
+        varchar relationship_type
+    }
+    family_invitations {
+        uuid id PK
+        uuid family_id FK
+        varchar email
+    }
+    health_records {
+        uuid id PK
+        uuid member_id FK
+        varchar record_type
+        varchar title
+        date occurred_on
+    }
+    lab_reports {
+        uuid id PK
+        uuid member_id FK
+        varchar ocr_status
+        varchar original_file_name
+    }
+    lab_report_files {
+        uuid id PK
+        uuid lab_report_id FK
+        bytea content
+    }
+    lab_values {
+        uuid id PK
+        uuid lab_report_id FK
+        varchar analyte
+        numeric value
+        boolean was_manually_confirmed
+    }
+    vitals {
+        uuid id PK
+        uuid member_id FK
+        varchar vital_type
+        numeric value
+        timestamptz measured_at
+    }
+    hereditary_flags {
+        uuid id PK
+        uuid member_id FK
+        varchar condition_code
+        boolean manually_confirmed
+        uuid lab_report_id FK
+    }
+    episodes {
+        uuid id PK
+        uuid member_id FK
+        int severity
+    }
+    triage_cases {
+        uuid id PK
+        uuid episode_id FK
+        varchar status
+    }
+    agent_traces {
+        uuid id PK
+        uuid triage_case_id FK
+        int step_number
+    }
+    notification_subscriptions {
+        uuid id PK
+        uuid user_id FK
+    }
+    doctors {
+        uuid id PK
+        uuid user_id FK
+        varchar verification_status
+    }
+    doctor_verification_logs {
+        uuid id PK
+        uuid doctor_id FK
+    }
+    family_doctor_assignments {
+        uuid id PK
+        uuid family_id FK
+        uuid doctor_id FK
+    }
+    case_access_grants {
+        uuid id PK
+        uuid triage_case_id FK
+        uuid doctor_id FK
+    }
+    approvals {
+        uuid id PK
+        uuid triage_case_id FK
+    }
+    audit_logs {
+        uuid id PK
+        uuid subject_member_id FK
+        varchar event_type
+    }

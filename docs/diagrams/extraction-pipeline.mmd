@@ -1,0 +1,43 @@
+%% [S2] Stage 1 extraction pipeline (ADR-003). Synthetic data only.
+%% OCR text is untrusted input. Confirmed flags only may leave this stage.
+
+flowchart TD
+    subgraph CLIENTS["Clients"]
+        CAM["Flutter camera upload<br/>lab_upload_screen.dart"]
+        WEB["React record browser<br/>RecordsPage.tsx"]
+    end
+
+    subgraph API["ASP.NET Core — S2"]
+        RC["RecordsController<br/>multipart + extract + review"]
+        RS["RecordService<br/>size · MIME · magic bytes"]
+        EA["ExtractionAgent<br/>deterministic · no LLM"]
+        TD["ToolDispatcher allow-list<br/>S1 enforcement of S2 tools"]
+        OCR["TesseractOcrService"]
+        PARSE["ParseValues / ParseFlags<br/>regex · bounded · untrusted"]
+    end
+
+    subgraph DB["PostgreSQL"]
+        LR["lab_reports + lab_report_files"]
+        LV["lab_values<br/>was_manually_confirmed = false"]
+        HF["hereditary_flags<br/>manually_confirmed = false"]
+        AUDIT["audit_logs<br/>LAB_REPORT_MANUAL_REVIEW"]
+        CONFIRMED["confirmed flags only"]
+    end
+
+    S4["Familial Risk Agent S4<br/>read_consented_hereditary_flags"]
+
+    CAM --> RC
+    WEB --> RC
+    RC --> RS --> LR
+    RC -->|POST /extract| EA
+    EA -->|read_member_profile| TD
+    EA -->|read_raw_record metadata only| TD
+    EA -->|ocr_extract| TD --> OCR --> PARSE
+    PARSE --> EA
+    EA -->|write_lab_extraction| TD
+    TD --> LV
+    TD --> HF
+    WEB -->|PUT /review| RS --> AUDIT
+    RS --> CONFIRMED
+    CONFIRMED --> S4
+    LR -.raw OCR text never.-> S4
